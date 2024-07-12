@@ -1,0 +1,20 @@
+# Run with `dart run ffigen --config ffigen.yaml`.
+name: SuperuserPluginWindowsBindings
+description: |
+  Bindings for `src/superuser_plugin_windows.h`.
+
+  Regenerate bindings with `dart run ffigen --config ffigen.yaml`.
+output: 'lib/superuser_plugin_windows_bindings_generated.dart'
+headers:
+  entry-points:
+    - 'src/superuser_plugin_windows.h'
+  include-directives:
+    - 'src/superuser_plugin_windows.h'
+preamble: |
+  // ignore_for_file: always_specify_types
+  // ignore_for_file: camel_case_types
+  // ignore_for_file: non_constant_identifier_names
+comments:
+  style: any
+  length: full
+language: c
