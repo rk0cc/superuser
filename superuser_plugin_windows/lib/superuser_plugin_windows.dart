@@ -9,22 +9,27 @@ import 'superuser_plugin_windows_bindings_generated.dart';
 
 const String _libName = 'superuser_plugin_windows';
 
-/// The dynamic library in which the symbols for [SuperuserPluginWindowsBindings] can be found.
-final DynamicLibrary _dylib = () {
-  if (Platform.isWindows) {
-    return DynamicLibrary.open('$_libName.dll');
-  }
-
-  throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
-}();
-
-/// The bindings to the native functions in [_dylib].
-final SuperuserPluginWindowsBindings _bindings =
-    SuperuserPluginWindowsBindings(_dylib);
-
 /// Construct [SuperuserInterface] based on Windows API.
 final class WindowsSuperuser implements SuperuserInterface {
-  WindowsSuperuser() : assert(Platform.isWindows);
+  static WindowsSuperuser? _instance;
+
+  late final SuperuserPluginWindowsBindings _bindings;
+
+  WindowsSuperuser._() {
+    SuperuserPluginWindowsBindings(() {
+      if (Platform.isWindows) {
+        return DynamicLibrary.open('$_libName.dll');
+      }
+
+      throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
+    }());
+  }
+
+  factory WindowsSuperuser() {
+    _instance ??= WindowsSuperuser._();
+
+    return _instance!;
+  }
 
   /* TODO: Make Win32's 'BOOL' map to 'bool' */
 
