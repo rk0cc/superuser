@@ -16,7 +16,7 @@ final class WindowsSuperuser implements SuperuserInterface {
   late final SuperuserPluginWindowsBindings _bindings;
 
   WindowsSuperuser._() {
-    SuperuserPluginWindowsBindings(() {
+    _bindings = SuperuserPluginWindowsBindings(() {
       if (Platform.isWindows) {
         return DynamicLibrary.open('$_libName.dll');
       }
