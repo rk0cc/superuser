@@ -9,6 +9,8 @@ dependencies:
   flutter:
     sdk: flutter
   superuser_interfaces: ^1.0.0
+dev_dependencies:
+  flutter_lints: ^4.0.0
 platforms:
   linux:
   macos:
