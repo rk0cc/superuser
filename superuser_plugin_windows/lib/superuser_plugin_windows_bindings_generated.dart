@@ -28,36 +28,31 @@ final class SuperuserPluginWindowsBindings {
       : _lookup = lookup;
 
   /// Verify user who execute program has admin right.
-  int is_admin_user() {
+  bool is_admin_user() {
     return _is_admin_user();
   }
 
   late final _is_admin_userPtr =
-      _lookup<ffi.NativeFunction<BOOL Function()>>('is_admin_user');
-  late final _is_admin_user = _is_admin_userPtr.asFunction<int Function()>();
+      _lookup<ffi.NativeFunction<ffi.Bool Function()>>('is_admin_user');
+  late final _is_admin_user = _is_admin_userPtr.asFunction<bool Function()>();
 
   /// Determine this program is executed with admin.
-  int is_elevated() {
+  bool is_elevated() {
     return _is_elevated();
   }
 
   late final _is_elevatedPtr =
-      _lookup<ffi.NativeFunction<BOOL Function()>>('is_elevated');
-  late final _is_elevated = _is_elevatedPtr.asFunction<int Function()>();
+      _lookup<ffi.NativeFunction<ffi.Bool Function()>>('is_elevated');
+  late final _is_elevated = _is_elevatedPtr.asFunction<bool Function()>();
 
   /// Obtain name of user.
-  LPWSTR get_current_username() {
+  ffi.Pointer<ffi.Char> get_current_username() {
     return _get_current_username();
   }
 
   late final _get_current_usernamePtr =
-      _lookup<ffi.NativeFunction<LPWSTR Function()>>('get_current_username');
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'get_current_username');
   late final _get_current_username =
-      _get_current_usernamePtr.asFunction<LPWSTR Function()>();
+      _get_current_usernamePtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
 }
-
-typedef BOOL = ffi.Int;
-typedef DartBOOL = int;
-typedef LPWSTR = ffi.Pointer<WCHAR>;
-typedef WCHAR = ffi.WChar;
-typedef DartWCHAR = int;

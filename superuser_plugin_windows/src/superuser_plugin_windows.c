@@ -3,9 +3,10 @@
 #include "superuser_plugin_windows.h"
 
 #define MAX_USERNAME_CHAR 257
+#define MAX_USERNAME_CHAR8 769
 
 // Verify user who execute program has admin right.
-FFI_PLUGIN_EXPORT BOOL is_admin_user()
+FFI_PLUGIN_EXPORT bool is_admin_user()
 {
     BOOL admin;
     SID_IDENTIFIER_AUTHORITY ntAuth = SECURITY_NT_AUTHORITY;
@@ -34,7 +35,7 @@ FFI_PLUGIN_EXPORT BOOL is_admin_user()
 }
 
 // Determine this program is executed with admin.
-FFI_PLUGIN_EXPORT BOOL is_elevated()
+FFI_PLUGIN_EXPORT bool is_elevated()
 {
     BOOL ret = FALSE;
     HANDLE token = NULL;
@@ -69,7 +70,7 @@ FFI_PLUGIN_EXPORT BOOL is_elevated()
 }
 
 // Obtain name of user.
-FFI_PLUGIN_EXPORT LPWSTR get_current_username()
+FFI_PLUGIN_EXPORT char* get_current_username()
 {
     WCHAR buffer[MAX_USERNAME_CHAR];
     DWORD bufLen = MAX_USERNAME_CHAR;
@@ -77,5 +78,9 @@ FFI_PLUGIN_EXPORT LPWSTR get_current_username()
     if (!GetUserNameW(buffer, &bufLen))
         return "<Unknown username>";
 
-    return buffer;
+    char* buffer8[MAX_USERNAME_CHAR8];
+
+    WideCharToMultiByte(CP_UTF8, 0, buffer, -1, buffer8, MAX_USERNAME_CHAR8, NULL, NULL);
+
+    return buffer8;
 }

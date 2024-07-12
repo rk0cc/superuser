@@ -31,15 +31,13 @@ final class WindowsSuperuser implements SuperuserInterface {
     return _instance!;
   }
 
-  /* TODO: Make Win32's 'BOOL' map to 'bool' */
+  @override
+  bool get isActivated => _bindings.is_elevated();
 
   @override
-  bool get isActivated => _bindings.is_elevated() != 0;
-
-  @override
-  bool get isSuperuser => _bindings.is_admin_user() != 0;
+  bool get isSuperuser => _bindings.is_admin_user();
 
   @override
   String get whoAmI =>
-      _bindings.get_current_username().cast<ffi.Utf16>().toDartString();
+      _bindings.get_current_username().cast<ffi.Utf8>().toDartString();
 }
