@@ -78,9 +78,11 @@ FFI_PLUGIN_EXPORT char* get_current_username()
     if (!GetUserNameW(buffer, &bufLen))
         return "<Unknown username>";
 
-    char* buffer8[MAX_USERNAME_CHAR8];
+    int buf8_size = WideCharToMultiByte(CP_UTF8, 0, buffer, -1, NULL, 0, NULL, NULL);
 
-    WideCharToMultiByte(CP_UTF8, 0, buffer, -1, buffer8, MAX_USERNAME_CHAR8, NULL, NULL);
+    char* buffer8 = (char *) malloc(buf8_size);
+
+    WideCharToMultiByte(CP_UTF8, 0, buffer, -1, buffer8, buf8_size, NULL, NULL);
 
     return buffer8;
 }
