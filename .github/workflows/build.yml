@@ -1,11 +1,8 @@
 name: Demo build
 on:
-  #push: 
-  #  branches: 
-  #    - main
-  #  paths: 
-  #    - 'superuser/**.dart'
-  #    - '.github/workflows/build.yml'
+  push: 
+    tags: 
+      - '*.*.*'
   workflow_dispatch:
 defaults:
   run:
