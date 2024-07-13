@@ -2,6 +2,8 @@
 /// values when performing debugs or testing.
 library mock;
 
-import 'package:superuser_interfaces/superuser_interfaces.dart' show SuperuserInterface;
+import 'package:superuser_interfaces/superuser_interfaces.dart'
+    show SuperuserInterface;
 
-export 'package:superuser_interfaces/superuser_interfaces.dart' show MockSuperuser;
+export 'package:superuser_interfaces/superuser_interfaces.dart'
+    show MockSuperuser;

@@ -33,7 +33,7 @@ abstract final class SuperuserInstance {
 ///
 /// If [suInterface] is `null`, it binds platform specified
 /// [SuperuserInterface] automatically.
-/// 
+///
 /// When this invoked in neither Windows, macOS or Linux platform,
 /// it throws [UnsupportedError].
 void bindInstance(SuperuserInterface? suInterface) {
