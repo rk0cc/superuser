@@ -43,7 +43,7 @@ class Context extends StatelessWidget {
   }
 
   List<Color> _getStatusGradients(bool enabled) {
-    Iterable<Color> _gradientsGenerator(int transCounts) sync* {
+    Iterable<Color> gradientsGenerator(int transCounts) sync* {
       assert(transCounts > 0);
 
       for (int c = 0; c < transCounts; c++) {
@@ -53,7 +53,7 @@ class Context extends StatelessWidget {
       yield (enabled ? Colors.greenAccent[400] : Colors.redAccent[400])!;
     }
 
-    return _gradientsGenerator(2).toList(growable: false);
+    return gradientsGenerator(2).toList(growable: false);
   }
 
   @override
