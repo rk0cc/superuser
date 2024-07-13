@@ -9,7 +9,16 @@ abstract final class SuperuserInstance {
 
   const SuperuserInstance._();
 
-  static void bindInstance(SuperuserInterface? suInterface) {
+  static SuperuserInterface get instance {
+    if (_instance == null) {
+      bindInstance(null);
+    }
+
+    return _instance!;
+  }
+}
+
+void bindInstance(SuperuserInterface? suInterface) {
     late SuperuserInterface newInst;
 
     if (suInterface == null) {
@@ -25,14 +34,5 @@ abstract final class SuperuserInstance {
       newInst = suInterface;
     }
 
-    _instance = newInst;
+    SuperuserInstance._instance = newInst;
   }
-
-  static SuperuserInterface get instance {
-    if (_instance == null) {
-      bindInstance(null);
-    }
-
-    return _instance!;
-  }
-}
