@@ -17,10 +17,8 @@ dependencies:
   flutter:
     sdk: flutter
   superuser_interfaces: ^1.0.0
-  superuser_plugin_unix: # '>=0.1.0 <1.0.0'
-    path: ../superuser_plugin_unix
-  superuser_plugin_windows: # '>=0.1.0 <1.0.0'
-    path: ../superuser_plugin_windows
+  superuser_plugin_unix: ">=0.1.0 <1.0.0"
+  superuser_plugin_windows: ">=0.1.0 <1.0.0"
 dev_dependencies:
   flutter_lints: ^4.0.0
 platforms:
