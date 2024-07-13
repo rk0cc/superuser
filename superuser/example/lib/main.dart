@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:superuser/superuser.dart';
+import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 void main() {
   runApp(const App());
@@ -20,8 +22,7 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: _appTitle, home: const Context());
+    return MaterialApp(title: _appTitle, home: const Context());
   }
 }
 
@@ -34,6 +35,27 @@ class Context extends StatelessWidget {
 
   const Context({super.key});
 
+  Future<void> _launchWebsite(Uri url) async {
+    if (await url_launcher.canLaunchUrl(url)) {
+      await url_launcher.launchUrl(url,
+          mode: url_launcher.LaunchMode.externalApplication);
+    }
+  }
+
+  List<Color> _getStatusGradients(bool enabled) {
+    Iterable<Color> _gradientsGenerator(int transCounts) sync* {
+      assert(transCounts > 0);
+
+      for (int c = 0; c < transCounts; c++) {
+        yield Colors.transparent;
+      }
+
+      yield (enabled ? Colors.greenAccent[400] : Colors.redAccent[400])!;
+    }
+
+    return _gradientsGenerator(2).toList(growable: false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,8 +65,36 @@ class Context extends StatelessWidget {
           DrawerHeader(
               decoration:
                   BoxDecoration(color: Theme.of(context).secondaryHeaderColor),
-              child: null),
-          
+              child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                      padding: const EdgeInsets.all(2),
+                      child: IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: () {
+                            Navigator.pop<void>(context);
+                          })))),
+          ListTile(
+              leading: const Icon(FontAwesomeIcons.github, color: Colors.black),
+              title: const Text("GitHub repository"),
+              onTap: () {
+                _launchWebsite(Uri.https("github.com", "/rk0cc/superuser"));
+              }),
+          ListTile(
+              leading: const FlutterLogo(style: FlutterLogoStyle.markOnly),
+              title: const Text("pub.dev"),
+              onTap: () {
+                _launchWebsite(Uri.https("pub.dev", "/packages/superuser"));
+              }),
+          const Padding(
+              padding: EdgeInsets.symmetric(vertical: 4), child: Divider()),
+          ListTile(
+              leading:
+                  Icon(FontAwesomeIcons.dollarSign, color: Colors.amber[400]),
+              title: const Text("Donate"),
+              onTap: () {
+                _launchWebsite(Uri.https("github.com", "/sponsors/rk0cc"));
+              })
         ])),
         body: ListView(
             padding: const EdgeInsets.only(top: 8, left: 18, right: 18),
@@ -53,14 +103,25 @@ class Context extends StatelessWidget {
               ListTile(
                   title: const Text("Username", style: _titleStyle),
                   trailing: Text(Superuser.whoAmI, style: _valueStyle)),
-              ListTile(
-                  title: const Text("Has superuser role", style: _titleStyle),
-                  trailing: Text(Superuser.isSuperuser ? "Yes" : "No",
-                      style: _valueStyle)),
-              ListTile(
-                  title: const Text("Run as superuser", style: _titleStyle),
-                  trailing: Text(Superuser.isActivated ? "Yes" : "No",
-                      style: _valueStyle))
+              const Divider(),
+              Container(
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                          colors: _getStatusGradients(Superuser.isSuperuser))),
+                  child: ListTile(
+                      title:
+                          const Text("Has superuser role", style: _titleStyle),
+                      trailing: Text(Superuser.isSuperuser ? "Yes" : "No",
+                          style: _valueStyle))),
+              const Divider(),
+              Container(
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                          colors: _getStatusGradients(Superuser.isActivated))),
+                  child: ListTile(
+                      title: const Text("Run as superuser", style: _titleStyle),
+                      trailing: Text(Superuser.isActivated ? "Yes" : "No",
+                          style: _valueStyle)))
             ]));
   }
 }
