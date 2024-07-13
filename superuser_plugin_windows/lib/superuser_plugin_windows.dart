@@ -38,13 +38,6 @@ final class WindowsSuperuser implements SuperuserInterface {
   bool get isSuperuser => _bindings.is_admin_user();
 
   @override
-  String get whoAmI => ffi.using((arena) {
-        final ptr = _bindings.get_current_username();
-
-        String result = ptr.cast<ffi.Utf8>().toDartString();
-
-        arena.free(ptr);
-
-        return result;
-      });
+  String get whoAmI =>
+      _bindings.get_current_username().cast<ffi.Utf8>().toDartString();
 }

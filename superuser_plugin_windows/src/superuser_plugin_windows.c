@@ -3,7 +3,6 @@
 #include "superuser_plugin_windows.h"
 
 #define MAX_USERNAME_CHAR 257
-#define MAX_USERNAME_CHAR8 769
 
 // Verify user who execute program has admin right.
 FFI_PLUGIN_EXPORT bool is_admin_user()
@@ -80,7 +79,7 @@ FFI_PLUGIN_EXPORT char* get_current_username()
 
     int buf8_size = WideCharToMultiByte(CP_UTF8, 0, buffer, -1, NULL, 0, NULL, NULL);
 
-    char* buffer8 = (char *) malloc(buf8_size);
+    char* buffer8 = (char *) calloc(buf8_size, sizeof(char));
 
     WideCharToMultiByte(CP_UTF8, 0, buffer, -1, buffer8, buf8_size, NULL, NULL);
 
