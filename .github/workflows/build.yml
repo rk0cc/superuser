@@ -25,6 +25,8 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
         working-directory: ./superuser
+      - name: Install tools
+        run: sudo apt update && sudo apt install curl git unzip xz-utils zip libglu1-mesa clang cmake ninja-build pkg-config libgtk-3-dev libstdc++-12-dev -y
       - name: Build example
         run: flutter build windows --release
       - name: Upload build
