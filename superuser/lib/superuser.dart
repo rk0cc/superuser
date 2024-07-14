@@ -4,9 +4,6 @@
 /// as well as username who run current Flutter program.
 library superuser;
 
-export 'package:superuser_interfaces/superuser_interfaces.dart'
-    show SuperuserInterface;
-
 import 'package:superuser_interfaces/superuser_interfaces.dart'
     show MockSuperuser;
 
