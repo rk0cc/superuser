@@ -1,8 +1,48 @@
 library interfaces;
 
+import 'dart:ffi' show DynamicLibrary;
+import 'dart:io';
+
+import 'package:meta/meta.dart';
+
+/// Indicate any errors encountered when fetching properties
+/// in [SuperuserInterface].
+class SuperuserProcessError extends Error implements OSError {
+  /// Error code returned from native library.
+  @override
+  final int errorCode;
+
+  /// Message to explain [errorCode].
+  @override
+  final String message;
+
+  /// Create [SuperuserProcessError] with given [errorCode].
+  ///
+  /// Optionally, provide a [message] for further explaination
+  /// of error.
+  SuperuserProcessError(this.errorCode, [this.message = ""]);
+
+  @override
+  String toString() {
+    StringBuffer buf = StringBuffer();
+
+    buf.write("SuperuserProcessError: ");
+
+    if (message.isNotEmpty) {
+      buf
+        ..write(message)
+        ..write(" (error code: $errorCode)");
+    } else {
+      buf.write("process return with error code $errorCode");
+    }
+
+    return buf.toString();
+  }
+}
+
 /// Shared interface for evaluating superuser status when
 /// executing Flutter program.
-abstract interface class SuperuserInterface {
+abstract final class SuperuserInterface {
   const SuperuserInterface._();
 
   /// Determine current user has superuser role.
@@ -19,6 +59,62 @@ abstract interface class SuperuserInterface {
 
   /// Retrive name of user, who run this program.
   String get whoAmI;
+}
+
+/// Platform specified [SuperuserInterface] to retrive properties from
+/// plugins.
+///
+/// This cannot be used in tesing due to unpredictable expectation
+/// of properties. Therefore, [MockSuperuser] must be used
+/// to ensure all properties are controllable that all test
+/// results should be predictable.
+abstract base class SuperuserPlatform implements SuperuserInterface {
+  final DynamicLibrary _nativeLibrary;
+  bool _closed = false;
+
+  /// Create [SuperuserPlatform] for targeted platform.
+  ///
+  /// Usually, it should performs binding from plugin to ensure
+  /// [SuperuserInterface]'s properties can be fetched.
+  ///
+  /// This cannot be used in testing environment and
+  /// [UnsupportedError] throw if attempted to construst
+  /// in testing.
+  SuperuserPlatform(DynamicLibrary Function() nativeLibrary)
+      : _nativeLibrary = nativeLibrary() {
+    if (Platform.environment.containsKey("FLUTTER_TEST")) {
+      throw UnsupportedError(
+          "Using real superuser result to run test is forbidden.");
+    }
+  }
+
+  /// Middleman of retrive properties from [handler] and prevent
+  /// it when [isClosed], which throw [StateError] instead.
+  @protected
+  @nonVirtual
+  T onGettingProperties<T>(T Function(DynamicLibrary) handler) {
+    if (isClosed) {
+      throw StateError("This instance has been closed already.");
+    }
+
+    return handler(_nativeLibrary);
+  }
+
+  /// Determine it called [close] already that it no longer
+  /// returns properties from native library.
+  @nonVirtual
+  bool get isClosed => _closed;
+
+  /// Terminate and release resources of native libary.
+  ///
+  /// All properties in [SuperuserInterface] will no longer
+  /// be fetched and throws [StateError] if try to retrive
+  /// properties after this method called.
+  @nonVirtual
+  void close() {
+    _nativeLibrary.close();
+    _closed = true;
+  }
 }
 
 /// Replicate behaviour of [SuperuserInterface], which
@@ -40,15 +136,6 @@ final class MockSuperuser implements SuperuserInterface {
 
   /// Create mocked properties of [SuperuserInterface] to emulate
   /// superuser status.
-  ///
-  /// It is forbidden to enable [isActivated] without [isSuperuser].
-  MockSuperuser(
-      {this.isSuperuser = false, this.isActivated = false, this.whoAmI = ""})
-      : assert(() {
-          if (!isSuperuser) {
-            return !isActivated;
-          }
-
-          return true;
-        }(), "Non-superuser cannot be activated.");
+  const MockSuperuser(
+      {this.isSuperuser = false, this.isActivated = false, this.whoAmI = ""});
 }

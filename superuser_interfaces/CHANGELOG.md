@@ -1,3 +1,9 @@
+## 2.0.0
+
+* Mark `SuperuserInterface` final
+* Add `SuperuserPlatform` for handling fetching properties.
+* Add `SuperuserProcessError` to indicate error occured when fetching properties.
+
 ## 1.0.0
 
 * Include features
