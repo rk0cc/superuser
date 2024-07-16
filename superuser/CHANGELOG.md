@@ -1,3 +1,8 @@
+## 1.0.1
+
+* Resolve lower score due to violation of formatting
+* Provide `SuperuserProcessError` for catching error when fetching from plugin.
+
 ## 1.0.0
 
 * Add error handling
