@@ -37,13 +37,17 @@ final class SuperuserPluginUnixBindings {
   late final _is_root = _is_rootPtr.asFunction<bool Function()>();
 
   /// Obtain name of user.
-  ffi.Pointer<ffi.Char> get_uname() {
-    return _get_uname();
+  int get_uname(
+    ffi.Pointer<ffi.Pointer<ffi.Char>> result,
+  ) {
+    return _get_uname(
+      result,
+    );
   }
 
-  late final _get_unamePtr =
-      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
-          'get_uname');
-  late final _get_uname =
-      _get_unamePtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+  late final _get_unamePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('get_uname');
+  late final _get_uname = _get_unamePtr
+      .asFunction<int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
 }

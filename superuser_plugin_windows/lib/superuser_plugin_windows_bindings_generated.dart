@@ -46,13 +46,36 @@ final class SuperuserPluginWindowsBindings {
   late final _is_elevated = _is_elevatedPtr.asFunction<bool Function()>();
 
   /// Obtain name of user.
-  ffi.Pointer<ffi.Char> get_current_username() {
-    return _get_current_username();
+  int get_current_username(
+    ffi.Pointer<ffi.Pointer<ffi.Char>> result,
+  ) {
+    return _get_current_username(
+      result,
+    );
   }
 
-  late final _get_current_usernamePtr =
-      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
-          'get_current_username');
-  late final _get_current_username =
-      _get_current_usernamePtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+  late final _get_current_usernamePtr = _lookup<
+          ffi
+          .NativeFunction<DWORD Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>>(
+      'get_current_username');
+  late final _get_current_username = _get_current_usernamePtr
+      .asFunction<int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
+
+  /// Flush string from dynamic allocated function.
+  void flush_string(
+    ffi.Pointer<ffi.Char> str,
+  ) {
+    return _flush_string(
+      str,
+    );
+  }
+
+  late final _flush_stringPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Char>)>>(
+          'flush_string');
+  late final _flush_string =
+      _flush_stringPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
 }
+
+typedef DWORD = ffi.UnsignedLong;
+typedef DartDWORD = int;

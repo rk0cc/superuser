@@ -69,19 +69,28 @@ FFI_PLUGIN_EXPORT bool is_elevated()
 }
 
 // Obtain name of user.
-FFI_PLUGIN_EXPORT char* get_current_username()
+FFI_PLUGIN_EXPORT DWORD get_current_username(char** result)
 {
     WCHAR buffer[MAX_USERNAME_CHAR];
     DWORD bufLen = MAX_USERNAME_CHAR;
 
+    SetLastError(0);
+
     if (!GetUserNameW(buffer, &bufLen))
-        return "<Unknown username>";
+        return GetLastError();
 
     int buf8_size = WideCharToMultiByte(CP_UTF8, 0, buffer, -1, NULL, 0, NULL, NULL);
 
-    char* buffer8 = (char *) calloc(buf8_size, sizeof(char));
+    *result = (char *) calloc(buf8_size, sizeof(char));
 
-    WideCharToMultiByte(CP_UTF8, 0, buffer, -1, buffer8, buf8_size, NULL, NULL);
+    if (!WideCharToMultiByte(CP_UTF8, 0, buffer, -1, *result, buf8_size, NULL, NULL))
+        return GetLastError();
 
-    return buffer8;
+    return 0;
+}
+
+/// Flush string from dynamic allocated function.
+FFI_PLUGIN_EXPORT void flush_string(char* str)
+{
+    free(str);
 }

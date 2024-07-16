@@ -9,6 +9,6 @@
 FFI_PLUGIN_EXPORT bool is_root();
 
 // Obtain name of user.
-FFI_PLUGIN_EXPORT char* get_uname();
+FFI_PLUGIN_EXPORT int get_uname(char** result);
 
 #endif

@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <pwd.h>
 #include <unistd.h>
 
@@ -13,14 +14,19 @@ FFI_PLUGIN_EXPORT bool is_root()
 }
 
 // Obtain name of user.
-FFI_PLUGIN_EXPORT char* get_uname()
+FFI_PLUGIN_EXPORT int get_uname(char** result)
 {
+    errno = 0;
+
     struct passwd *pw;
     UID uid = geteuid();
 
     pw = getpwuid(uid);
     if (!pw)
-        return "<Unknown username>";
+        return errno;
+        
 
-    return pw->pw_name;
+    *result = pw->pw_name;
+
+    return 0;
 }

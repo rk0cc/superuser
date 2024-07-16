@@ -13,6 +13,9 @@ FFI_PLUGIN_EXPORT bool is_admin_user();
 FFI_PLUGIN_EXPORT bool is_elevated();
 
 // Obtain name of user.
-FFI_PLUGIN_EXPORT char* get_current_username();
+FFI_PLUGIN_EXPORT DWORD get_current_username(char** result);
+
+/// Flush string from dynamic allocated function.
+FFI_PLUGIN_EXPORT void flush_string(char* str);
 
 #endif
