@@ -1,3 +1,10 @@
+## 1.0.0
+
+* Add error handling
+* Integrate instance managing feature into `SuperuserInstance`
+* Improve effience of memory allocation in Windows platform.
+* Remove `MockSuperuser` restriction and mark as constant.
+
 ## 0.1.1
 
 * Exclude `SuperuserInterface` in `superuser` library.

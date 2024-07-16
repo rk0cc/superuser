@@ -18,13 +18,13 @@ For testing, `MockSuperuser` must be binded already before performing widget tes
 
 ```dart
 import 'package:flutter_test/flutter_test.dart';
-import 'package:superuser/instance.dart' as su_inst show bindInstance;
+import 'package:superuser/instance.dart';
 import 'package:superuser/mock.dart';
 
 void main() {
     setUpAll(() {
         // Bind mock instance here
-        su_inst.bindInstance(MockSuperuser(whoAmI: "reonaw"));
+        SuperuserInstance.bindInstance(const MockSuperuser(whoAmI: "reonaw"));
     });
     // Do any testes below
 }
@@ -34,27 +34,13 @@ If using for debug simulation, mock interface must be binded before `runApp`:
 
 ```dart
 import 'package:flutter/widgets.dart';
-import 'package:superuser/instance.dart' as su_inst show bindInstance;
+import 'package:superuser/instance.dart';
 import 'package:superuser/mock.dart';
 
 void main() {
-    su_inst.bindInstance(MockSuperuser(whoAmI: "raisushawaa", isSuperuser: true, isActivated: true));
+    SuperuserInstance.bindInstance(const MockSuperuser(whoAmI: "hiderik", isSuperuser: true, isActivated: true));
 
     runApp(const YourApp());
-}
-```
-
-When using `MockSuperuser`, ensure `isActivated` cannot be satisified if `isSuperuser` is `false`. Assign this mock data will cause assertion error when constructing mock interface:
-
-```dart
-import 'package:superuser/instance.dart' as su_inst show bindInstance;
-import 'package:superuser/mock.dart';
-
-void main() {
-    su_inst.bindInstance(
-        // AssertionError will be thrown
-        MockSuperuser(whoAmI: "yuunagit", isActivated: true)
-    );
 }
 ```
 

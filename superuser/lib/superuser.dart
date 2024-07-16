@@ -19,7 +19,7 @@ abstract final class Superuser {
 
   /// Determine this program is executed by a user, who is superuser exactly or
   /// one of members in superuser group.
-  static bool get isSuperuser => SuperuserInstance.instance.isSuperuser;
+  static bool get isSuperuser => instance.isSuperuser;
 
   /// Determine this program is running with superuser role.
   ///
@@ -29,8 +29,8 @@ abstract final class Superuser {
   ///
   /// For Windows platform, it consider this process has been elevated
   /// or not.
-  static bool get isActivated => SuperuserInstance.instance.isActivated;
+  static bool get isActivated => instance.isActivated;
 
   /// Obtain username who call current program.
-  static String get whoAmI => SuperuserInstance.instance.whoAmI;
+  static String get whoAmI => instance.whoAmI;
 }
