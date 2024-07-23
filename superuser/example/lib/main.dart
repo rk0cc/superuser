@@ -35,7 +35,7 @@ class Context extends StatelessWidget {
 
   const Context({super.key});
 
-  Future<void> _launchWebsite(Uri url) async {
+  void _launchWebsite(Uri url) async {
     if (await url_launcher.canLaunchUrl(url)) {
       await url_launcher.launchUrl(url,
           mode: url_launcher.LaunchMode.externalApplication);
