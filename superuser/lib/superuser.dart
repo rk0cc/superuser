@@ -4,19 +4,25 @@
 /// as well as username who run current Flutter program.
 library superuser;
 
-export 'package:superuser_interfaces/superuser_interfaces.dart'
-    show SuperuserProcessError;
-
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:superuser_interfaces/superuser_interfaces.dart'
     show MockSuperuser;
 
 import 'src/instance.dart';
+import 'src/exception.dart';
+
+export 'package:superuser_interfaces/superuser_interfaces.dart'
+    show SuperuserProcessError;
+
+export 'src/exception.dart';
 
 /// A wrapper class that extract status of superuser as well as username.
 ///
 /// By default, [Superuser] will load instance for specific platform automatically.
-/// If mock data is required, please attach [MockSuperuser] into [bindInstance]
-/// before calling any getters in [Superuser].
+/// If mock data is required, please attach [MockSuperuser] into [SuperuserInstance.bindInstance]
+/// before calling any getters in [Superuser]. However, attaching mock instance
+/// should not be done in [kReleaseMode], which causes [IllegalInstanceError]
+/// throw.
 abstract final class Superuser {
   const Superuser._();
 

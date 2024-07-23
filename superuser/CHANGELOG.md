@@ -1,3 +1,7 @@
+## 1.0.2
+
+* Add assertion to prevent using mock interface in release mode.
+
 ## 1.0.1
 
 * Resolve lower score due to violation of formatting

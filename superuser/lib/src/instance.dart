@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:superuser_interfaces/superuser_interfaces.dart';
 import 'package:superuser_plugin_unix/superuser_plugin_unix.dart';
 import 'package:superuser_plugin_windows/superuser_plugin_windows.dart';
+
+import 'exception.dart';
 
 SuperuserInterface? _instance;
 
@@ -41,9 +44,20 @@ abstract final class SuperuserInstance {
   /// If [suInterface] is a member of [SuperuserPlatform],
   /// the provided interface should not be closed. Otherwise,
   /// it throws [ArgumentError].
+  ///
+  /// In [kReleaseMode] or non widget testing process, [suInterface] will not
+  /// accept [MockSuperuser] and throw [IllegalInstanceError] instead. Therefore,
+  /// ensure all dummy data are removed already.
   static void bindInstance(SuperuserInterface? suInterface) {
     if (!Platform.isWindows && !Platform.isMacOS && !Platform.isLinux) {
       throw UnsupportedError("Unknown platform");
+    }
+
+    if (kReleaseMode &&
+        !Platform.environment.containsKey("FLUTTER_TEST") &&
+        suInterface is MockSuperuser) {
+      throw IllegalInstanceError(
+          "Mock instance cannot be used in release mode.");
     }
 
     flushInstance();
