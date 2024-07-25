@@ -6,14 +6,16 @@
 
 #define FFI_PLUGIN_EXPORT __declspec(dllexport)
 
+typedef DWORD ERRCODE;
+
 // Verify user who execute program has admin right.
-FFI_PLUGIN_EXPORT bool is_admin_user();
+FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool* result);
 
 // Determine this program is executed with admin.
-FFI_PLUGIN_EXPORT bool is_elevated();
+FFI_PLUGIN_EXPORT ERRCODE is_elevated(bool* result);
 
 // Obtain name of user.
-FFI_PLUGIN_EXPORT DWORD get_current_username(char** result);
+FFI_PLUGIN_EXPORT ERRCODE get_current_username(char** result);
 
 /// Flush string from dynamic allocated function.
 FFI_PLUGIN_EXPORT void flush_string(char* str);
