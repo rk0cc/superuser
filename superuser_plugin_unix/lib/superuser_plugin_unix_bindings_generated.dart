@@ -1,6 +1,7 @@
 // ignore_for_file: always_specify_types
 // ignore_for_file: camel_case_types
 // ignore_for_file: non_constant_identifier_names
+// ignore_for_file: unused_element
 
 // AUTO GENERATED FILE, DO NOT EDIT.
 //
@@ -36,6 +37,25 @@ final class SuperuserPluginUnixBindings {
       _lookup<ffi.NativeFunction<ffi.Bool Function()>>('is_root');
   late final _is_root = _is_rootPtr.asFunction<bool Function()>();
 
+  /// Determine user is a group member, which eligable to execute program as root by calling
+  /// sudo command.
+  ///
+  /// This method requires sudo bundled in OS already. Normally, majority of UNIX or liked
+  /// system.
+  int is_sudo_group(
+    ffi.Pointer<ffi.Bool> result,
+  ) {
+    return _is_sudo_group(
+      result,
+    );
+  }
+
+  late final _is_sudo_groupPtr =
+      _lookup<ffi.NativeFunction<error_t Function(ffi.Pointer<ffi.Bool>)>>(
+          'is_sudo_group');
+  late final _is_sudo_group =
+      _is_sudo_groupPtr.asFunction<int Function(ffi.Pointer<ffi.Bool>)>();
+
   /// Obtain name of user.
   int get_uname(
     ffi.Pointer<ffi.Pointer<ffi.Char>> result,
@@ -47,7 +67,12 @@ final class SuperuserPluginUnixBindings {
 
   late final _get_unamePtr = _lookup<
       ffi.NativeFunction<
-          ffi.Int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('get_uname');
+          error_t Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('get_uname');
   late final _get_uname = _get_unamePtr
       .asFunction<int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
 }
+
+typedef error_t = ffi.Int;
+typedef Darterror_t = int;
+
+const int __error_t_defined = 1;
