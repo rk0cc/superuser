@@ -6,6 +6,8 @@
 
 #define FFI_PLUGIN_EXPORT __declspec(dllexport)
 
+// Returned value indicates the process result, which
+// uses non-zero values to denotes problem during processing.
 typedef DWORD ERRCODE;
 
 // Verify user who execute program has admin right.

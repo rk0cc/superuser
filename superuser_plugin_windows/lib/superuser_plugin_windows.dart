@@ -21,11 +21,45 @@ final class WindowsSuperuser extends SuperuserPlatform {
         });
 
   @override
-  bool get isActivated => onGettingProperties(
-      (lib) => SuperuserPluginWindowsBindings(lib).is_elevated());
+  bool get isActivated => onGettingProperties((lib) {
+        final SuperuserPluginWindowsBindings bindings =
+            SuperuserPluginWindowsBindings(lib);
+
+        Pointer<Bool> result = ffi.calloc<Bool>();
+
+        try {
+          int errCode = bindings.is_elevated(result);
+
+          if (errCode != 0) {
+            throw SuperuserProcessError(
+                errCode, "Cannot determine superuser activation status.");
+          }
+
+          return result.value;
+        } finally {
+          ffi.calloc.free(result);
+        }
+      });
   @override
-  bool get isSuperuser => onGettingProperties(
-      (lib) => SuperuserPluginWindowsBindings(lib).is_admin_user());
+  bool get isSuperuser => onGettingProperties((lib) {
+        final SuperuserPluginWindowsBindings bindings =
+            SuperuserPluginWindowsBindings(lib);
+
+        Pointer<Bool> result = ffi.calloc<Bool>();
+
+        try {
+          int errCode = bindings.is_admin_user(result);
+
+          if (errCode != 0) {
+            throw SuperuserProcessError(
+                errCode, "Unable to retrive user's superuser role.");
+          }
+
+          return result.value;
+        } finally {
+          ffi.calloc.free(result);
+        }
+      });
 
   @override
   String get whoAmI => onGettingProperties((lib) {

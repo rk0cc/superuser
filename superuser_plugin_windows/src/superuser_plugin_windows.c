@@ -1,8 +1,4 @@
-#ifndef UNICODE
-#define UNICODE
-#endif
-#pragma comment(lib, "netapi32.lib")
-
+#include <Windows.h>
 #include <LM.h>
 #include <stdlib.h>
 
