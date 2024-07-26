@@ -26,7 +26,23 @@ FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool* result)
     LPBYTE buf;
     DWORD entries, total;
 
-    NET_API_STATUS status = NetUserGetLocalGroups(NULL, ubuf, 0, LG_INCLUDE_INDIRECT, &buf, MAX_PREFERRED_LENGTH, &entries, &total);
+    NET_API_STATUS status;
+    status = NetUserGetLocalGroups(NULL, ubuf, 0, LG_INCLUDE_INDIRECT, &buf, MAX_PREFERRED_LENGTH, &entries, &total);
+    if (status)
+        return status;
+
+    LPCWSTR adminGpName = L"Administrators";
+    LOCALGROUP_USERS_INFO_0* lg = (LOCALGROUP_USERS_INFO_0*) buf;
+    for (DWORD i = 0; i < entries; i++)
+    {
+        if (wcscmp(adminGpName, lg[i].lgrui0_name) == 0)
+        {
+            *result = true;
+            break;
+        }
+    }
+
+    NetApiBufferFree(buf);
 
     return 0;
 }
