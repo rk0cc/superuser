@@ -1,3 +1,9 @@
+## 2.0.0-m.1
+
+* `isSuperuser` can returns true without superuser permission activated.
+    * Windows: Uses `NetUserGetLocalGroups` to find current user is a member of `Administrators`.
+    * UNIX: Determine user joined default `sudo` command enabled groups (`admin` in macOS, `sudo` in Linux).
+
 ## 1.0.2
 
 * Add assertion to prevent using mock interface in release mode.
