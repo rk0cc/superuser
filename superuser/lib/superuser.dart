@@ -28,6 +28,13 @@ abstract final class Superuser {
 
   /// Determine this program is executed by a user, who is superuser exactly or
   /// one of members in superuser group.
+  /// 
+  /// For UNIX platform, it returns true if user who execute this program is `root`
+  /// or a member of built-in group that can uses `sudo` command. (`admin` for macOS
+  /// or `sudo` for majority of Linux systems).
+  /// 
+  /// In Windows, it returns true if current user is a member of `Administrators`
+  /// group in local machine.
   static bool get isSuperuser => instance.isSuperuser;
 
   /// Determine this program is running with superuser role.
@@ -37,7 +44,8 @@ abstract final class Superuser {
   /// user can be represented as superuser.
   ///
   /// For Windows platform, it consider this process has been elevated
-  /// or not.
+  /// or not, which should be positive if and only if user granted UAC
+  /// prompt.
   static bool get isActivated => instance.isActivated;
 
   /// Obtain username who call current program.
