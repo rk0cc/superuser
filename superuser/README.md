@@ -48,6 +48,8 @@ void main() {
 
 Demo application of `superuser` has been available in [release page](https://github.com/rk0cc/superuser/releases) in Windows and Linux application.
 
+These demo animations are for reference only, conditions and contents may be differ without notice.
+
 ### Open without superuser right
 
 ![Open demo application oridinary](https://github.com/user-attachments/assets/5b973019-c6d6-4466-9f60-01c86b06c1c8)

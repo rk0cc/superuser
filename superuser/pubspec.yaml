@@ -1,6 +1,6 @@
 name: superuser
 description: Detect, verify user who execute Flutter program has superuser role and running with superuser permission.
-version: 1.0.2
+version: 2.0.0-m.1
 homepage: https://github.com/rk0cc/superuser
 repository: https://github.com/rk0cc/superuser/tree/main/superuser
 funding:
@@ -19,8 +19,8 @@ dependencies:
     sdk: flutter
   meta: ^1.12.0
   superuser_interfaces: ^2.0.0
-  superuser_plugin_unix: ^1.0.0
-  superuser_plugin_windows: ^1.0.0
+  superuser_plugin_unix: ^2.0.0-m.2
+  superuser_plugin_windows: ^2.0.0-m.2
 dev_dependencies:
   flutter_lints: ^4.0.0
 platforms:

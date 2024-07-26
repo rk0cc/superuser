@@ -7,6 +7,7 @@ import 'package:superuser_plugin_unix/superuser_plugin_unix.dart';
 import 'package:superuser_plugin_windows/superuser_plugin_windows.dart';
 
 import 'exception.dart';
+import 'utils.dart';
 
 SuperuserInterface? _instance;
 
@@ -45,17 +46,16 @@ abstract final class SuperuserInstance {
   /// the provided interface should not be closed. Otherwise,
   /// it throws [ArgumentError].
   ///
-  /// In [kReleaseMode] or non widget testing process, [suInterface] will not
-  /// accept [MockSuperuser] and throw [IllegalInstanceError] instead. Therefore,
-  /// ensure all dummy data are removed already.
+  /// [suInterface] can only accept [MockSuperuser] if [kDebugMode]
+  /// or it performs widget testing. Using mock interface in
+  /// [kReleaseMode] or [kProfileMode] causes [IllegalInstanceError]
+  /// throw.
   static void bindInstance(SuperuserInterface? suInterface) {
     if (!Platform.isWindows && !Platform.isMacOS && !Platform.isLinux) {
       throw UnsupportedError("Unknown platform");
     }
 
-    if (kReleaseMode &&
-        !Platform.environment.containsKey("FLUTTER_TEST") &&
-        suInterface is MockSuperuser) {
+    if (!kUnderDevelop && suInterface is MockSuperuser) {
       throw IllegalInstanceError(
           "Mock instance cannot be used in release mode.");
     }
