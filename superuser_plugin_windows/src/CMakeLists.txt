@@ -16,4 +16,4 @@ set_target_properties(superuser_plugin_windows PROPERTIES
 
 target_compile_definitions(superuser_plugin_windows PUBLIC DART_SHARED_LIB)
 
-target_link_libraries(superuser_plugin_windows_library netapi32)
+target_link_libraries(superuser_plugin_windows netapi32)
