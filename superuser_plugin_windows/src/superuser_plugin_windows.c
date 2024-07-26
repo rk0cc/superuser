@@ -6,16 +6,6 @@
 
 #define MAX_USERNAME_CHAR 256
 
-typedef const void* BSEARCH_CMPPTR;
-
-int __local_group_cmp(BSEARCH_CMPPTR a, BSEARCH_CMPPTR b)
-{
-    LPWSTR aGpName = ((LOCALGROUP_USERS_INFO_0 *)a)->lgrui0_name;
-    LPWSTR bGpName = ((LOCALGROUP_USERS_INFO_0 *)b)->lgrui0_name;
-
-    return wcscmp(aGpName, bGpName);
-}
-
 // Verify user who execute program has admin right.
 FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool* result)
 {
@@ -37,15 +27,16 @@ FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool* result)
     if (status)
         return status;
 
-    const LOCALGROUP_USERS_INFO_0 adminCond = {
-        .lgrui0_name = L"Administrators"
-    };
+    LPCWSTR adminGpName = L"Administrators";
     LOCALGROUP_USERS_INFO_0* lg = (LOCALGROUP_USERS_INFO_0*) buf;
-    
-    LOCALGROUP_USERS_INFO_0* bsRes = (LOCALGROUP_USERS_INFO_0*) bsearch_s(&adminCond, lg, entries, sizeof(LOCALGROUP_USERS_INFO_0), __local_group_cmp, NULL);
-
-    if (bsRes)
-        *result = true;
+    for (DWORD i = 0; i < entries; i++)
+    {
+        if (wcscmp(adminGpName, lg[i].lgrui0_name) == 0)
+        {
+            *result = true;
+            break;
+        }
+    }
 
     NetApiBufferFree(buf);
 
