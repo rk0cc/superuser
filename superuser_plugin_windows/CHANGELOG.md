@@ -1,3 +1,7 @@
+## 2.0.0-m.2
+
+* Fix incorrect configuration in CMakeLists.txt
+
 ## 2.0.0-m.1
 
 * Change condition of `isSuperuser` by finding local user joined Administrators group already.
