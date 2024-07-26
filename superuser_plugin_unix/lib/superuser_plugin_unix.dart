@@ -28,11 +28,35 @@ final class UnixSuperuser extends SuperuserPlatform {
         });
 
   @override
-  bool get isActivated => isSuperuser;
+  bool get isActivated =>
+      onGettingProperties((lib) => SuperuserPluginUnixBindings(lib).is_root());
 
   @override
-  bool get isSuperuser =>
-      onGettingProperties((lib) => SuperuserPluginUnixBindings(lib).is_root());
+  bool get isSuperuser {
+    if (isActivated) {
+      return true;
+    }
+
+    return onGettingProperties((lib) {
+      final SuperuserPluginUnixBindings bindings =
+          SuperuserPluginUnixBindings(lib);
+
+      Pointer<Bool> result = ffi.calloc<Bool>();
+
+      try {
+        int errCode = bindings.is_sudo_group(result);
+
+        if (errCode > 0) {
+          throw SuperuserProcessError(
+              errCode, "Unable to retrive group information.");
+        }
+
+        return result.value;
+      } finally {
+        ffi.calloc.free(result);
+      }
+    });
+  }
 
   @override
   String get whoAmI => onGettingProperties((lib) {
@@ -44,7 +68,7 @@ final class UnixSuperuser extends SuperuserPlatform {
         try {
           int errCode = bindings.get_uname(resultPtr);
 
-          if (errCode != 0) {
+          if (errCode > 0) {
             throw SuperuserProcessError(errCode, "Unable to retrive username.");
           }
 

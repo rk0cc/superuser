@@ -3,7 +3,7 @@
 # the plugin to fail to compile for some customers of the plugin.
 cmake_minimum_required(VERSION 3.10)
 
-project(superuser_plugin_unix_library VERSION 0.0.1 LANGUAGES C)
+project(superuser_plugin_unix_library VERSION 2.0.0 LANGUAGES C)
 
 add_library(superuser_plugin_unix SHARED
   "superuser_plugin_unix.c"
