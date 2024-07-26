@@ -1,3 +1,7 @@
+## 2.0.0-m.2
+
+* Expand error code length to two 16-bits, which lower 16-bit denote value of `errno` and upper 16-bit uses for category.
+
 ## 2.0.0-m.1
 
 * Change definitions of `isActivated` and `isSuperuser`

@@ -1,9 +1,3 @@
-/*
-#ifndef _DEFAULT_SOURCE
-#define _DEFAULT_SOURCE
-#endif
-*/
-
 #include <errno.h>
 #include <grp.h>
 #include <pwd.h>
@@ -15,8 +9,20 @@
 
 #define ROOT_UID 0
 
+typedef enum _error_causes
+{
+    pwuid_err = 1,
+    grnam_err = 2,
+    grouplist_err = 3
+} error_causes;
+
+static ERRCODE __build_suunix_error_code(error_causes causes, int error_code)
+{
+    return (causes << 16) | error_code;
+}
+
 // Common method to obtain current user structure.
-void get_current_user_info(struct passwd** pw)
+void __get_current_user_info(struct passwd** pw)
 {
     uid_t uid = geteuid();
     *pw = getpwuid(uid);
@@ -33,16 +39,16 @@ FFI_PLUGIN_EXPORT bool is_root()
 //
 // This method requires sudo bundled in OS already. Normally, majority of UNIX or liked
 // system.
-FFI_PLUGIN_EXPORT error_t is_sudo_group(bool* result)
+FFI_PLUGIN_EXPORT ERRCODE is_sudo_group(bool* result)
 {
     *result = false;
 
     struct passwd* pw;
     errno = 0;
-    get_current_user_info(&pw);
+    __get_current_user_info(&pw);
 
     if (!pw)
-        return errno;
+        return __build_suunix_error_code(pwuid_err, errno);
 
     char* sudo_gpname;
     struct group *gp;
@@ -57,7 +63,7 @@ FFI_PLUGIN_EXPORT error_t is_sudo_group(bool* result)
     gp = getgrnam(sudo_gpname);
     if (!gp)
     {
-        return errno > 0 ? errno : 0;
+        return errno > 0 ? __build_suunix_error_code(grnam_err, errno) : 0;
     }
 
     gid_t sudo_gpid = gp->gr_gid;
@@ -66,15 +72,10 @@ FFI_PLUGIN_EXPORT error_t is_sudo_group(bool* result)
     getgrouplist(pw->pw_name, pw->pw_gid, NULL, &ngps);
     gid_t* gp_lists = (gid_t*) calloc(ngps, sizeof(gid_t));
 
-    if (gp_lists == NULL)
-    {
-        return ENOMEM;
-    }
-
     errno = 0;
     getgrouplist(pw->pw_name, pw->pw_gid, gp_lists, &ngps);
     if (errno > 0)
-        return errno;
+        return __build_suunix_error_code(grouplist_err, errno);
 
     for (int i = 0; i < ngps; i++)
     {
@@ -91,14 +92,14 @@ FFI_PLUGIN_EXPORT error_t is_sudo_group(bool* result)
 }
 
 // Obtain name of user.
-FFI_PLUGIN_EXPORT error_t get_uname(char** result)
+FFI_PLUGIN_EXPORT ERRCODE get_uname(char** result)
 {
     struct passwd* pw;
     errno = 0;
-    get_current_user_info(&pw);
+    __get_current_user_info(&pw);
 
     if (!pw)
-        return errno;
+        return __build_suunix_error_code(pwuid_err, errno);
 
     *result = pw->pw_name;
 

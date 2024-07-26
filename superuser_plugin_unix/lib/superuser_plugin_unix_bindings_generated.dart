@@ -51,7 +51,7 @@ final class SuperuserPluginUnixBindings {
   }
 
   late final _is_sudo_groupPtr =
-      _lookup<ffi.NativeFunction<error_t Function(ffi.Pointer<ffi.Bool>)>>(
+      _lookup<ffi.NativeFunction<ERRCODE Function(ffi.Pointer<ffi.Bool>)>>(
           'is_sudo_group');
   late final _is_sudo_group =
       _is_sudo_groupPtr.asFunction<int Function(ffi.Pointer<ffi.Bool>)>();
@@ -67,12 +67,10 @@ final class SuperuserPluginUnixBindings {
 
   late final _get_unamePtr = _lookup<
       ffi.NativeFunction<
-          error_t Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('get_uname');
+          ERRCODE Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('get_uname');
   late final _get_uname = _get_unamePtr
       .asFunction<int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
 }
 
-typedef error_t = ffi.Int;
-typedef Darterror_t = int;
-
-const int __error_t_defined = 1;
+typedef ERRCODE = ffi.UnsignedInt;
+typedef DartERRCODE = int;
