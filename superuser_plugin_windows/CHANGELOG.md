@@ -1,7 +1,3 @@
-## 2.0.0-m.3
-
-* Uses binary search to find user group is Administrators.
-
 ## 2.0.0-m.2
 
 * Fix incorrect configuration in CMakeLists.txt
