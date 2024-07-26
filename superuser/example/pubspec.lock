@@ -232,10 +232,10 @@ packages:
     dependency: transitive
     description:
       name: superuser_plugin_windows
-      sha256: c42251cc1c7cfbfc1c1ee40807da8689f00cf9ad67de64c1a911d26ae02bf32f
+      sha256: f7c002cfb92aad90e9394c0c057af271fa94347e3390b81f6fc77ac321b820f9
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0-m.1"
+    version: "2.0.0-m.2"
   term_glyph:
     dependency: transitive
     description:
