@@ -40,7 +40,7 @@ final class WindowsSuperuser extends SuperuserPlatform {
           ffi.calloc.free(result);
         }
       });
-      
+
   @override
   bool get isSuperuser => onGettingProperties((lib) {
         final SuperuserPluginWindowsBindings bindings =
