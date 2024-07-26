@@ -1,78 +1,78 @@
+#include <Windows.h>
+#include <LM.h>
 #include <stdlib.h>
 
 #include "superuser_plugin_windows.h"
 
-#define MAX_USERNAME_CHAR 257
+#define MAX_USERNAME_CHAR 256
 
 // Verify user who execute program has admin right.
-FFI_PLUGIN_EXPORT bool is_admin_user()
+FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool* result)
 {
-    BOOL admin;
-    SID_IDENTIFIER_AUTHORITY ntAuth = SECURITY_NT_AUTHORITY;
-    PSID adminGP;
+    *result = false;
+    
+    WCHAR ubuf[MAX_USERNAME_CHAR];
+    DWORD ubufLen = sizeof(ubuf) / sizeof(ubuf[0]);
 
-    admin = AllocateAndInitializeSid(
-        &ntAuth,
-        2,
-        SECURITY_BUILTIN_DOMAIN_RID,
-        DOMAIN_ALIAS_RID_ADMINS,
-        0, 0, 0, 0, 0, 0,
-        &adminGP
-    );
+    SetLastError(0);
 
-    if (admin)
+    if (!GetUserNameW(ubuf, &ubufLen))
+        return GetLastError();
+
+    LPBYTE buf;
+    DWORD entries, total;
+
+    NET_API_STATUS status;
+    status = NetUserGetLocalGroups(NULL, ubuf, 0, LG_INCLUDE_INDIRECT, &buf, MAX_PREFERRED_LENGTH, &entries, &total);
+    if (status)
+        return status;
+
+    LPCWSTR adminGpName = L"Administrators";
+    LOCALGROUP_USERS_INFO_0* lg = (LOCALGROUP_USERS_INFO_0*) buf;
+    for (DWORD i = 0; i < entries; i++)
     {
-        if (!CheckTokenMembership(NULL, adminGP, &admin))
+        if (wcscmp(adminGpName, lg[i].lgrui0_name) == 0)
         {
-            admin = FALSE;
+            *result = true;
+            break;
         }
-
-        FreeSid(adminGP);
     }
 
-    return admin;
+    NetApiBufferFree(buf);
+
+    return 0;
 }
 
 // Determine this program is executed with admin.
-FFI_PLUGIN_EXPORT bool is_elevated()
+FFI_PLUGIN_EXPORT ERRCODE is_elevated(bool* result)
 {
-    BOOL ret = FALSE;
+    *result = false;
     HANDLE token = NULL;
 
-    if (OpenProcessToken(
-        GetCurrentProcess(),
-        TOKEN_QUERY,
-        &token
-    ))
-    {
-        TOKEN_ELEVATION elevation;
-        DWORD cbSize = sizeof(TOKEN_ELEVATION);
+    SetLastError(0);
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token))
+        return GetLastError();
+    
+    TOKEN_ELEVATION elevation;
+    DWORD cbSize = sizeof(TOKEN_ELEVATION);
 
-        if (GetTokenInformation(
-            token, 
-            TokenElevation, 
-            &elevation,
-            sizeof elevation,
-            &cbSize
-        ))
-        {
-            ret = elevation.TokenIsElevated;
-        }
-    }
+    SetLastError(0);
+    if (!GetTokenInformation(token, TokenElevation, &elevation, sizeof elevation, &cbSize))
+        return GetLastError();
+
+    *result = elevation.TokenIsElevated;
 
     if (token)
-    {
         CloseHandle(token);
-    }
 
-    return ret;
+    return 0;
 }
 
 // Obtain name of user.
-FFI_PLUGIN_EXPORT DWORD get_current_username(char** result)
+FFI_PLUGIN_EXPORT ERRCODE get_current_username(char** result)
 {
     WCHAR buffer[MAX_USERNAME_CHAR];
-    DWORD bufLen = MAX_USERNAME_CHAR;
+    DWORD bufLen = sizeof(buffer) / sizeof(buffer[0]);
 
     SetLastError(0);
 

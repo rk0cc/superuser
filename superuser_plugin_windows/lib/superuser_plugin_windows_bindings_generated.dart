@@ -28,22 +28,34 @@ final class SuperuserPluginWindowsBindings {
       : _lookup = lookup;
 
   /// Verify user who execute program has admin right.
-  bool is_admin_user() {
-    return _is_admin_user();
+  int is_admin_user(
+    ffi.Pointer<ffi.Bool> result,
+  ) {
+    return _is_admin_user(
+      result,
+    );
   }
 
   late final _is_admin_userPtr =
-      _lookup<ffi.NativeFunction<ffi.Bool Function()>>('is_admin_user');
-  late final _is_admin_user = _is_admin_userPtr.asFunction<bool Function()>();
+      _lookup<ffi.NativeFunction<ERRCODE Function(ffi.Pointer<ffi.Bool>)>>(
+          'is_admin_user');
+  late final _is_admin_user =
+      _is_admin_userPtr.asFunction<int Function(ffi.Pointer<ffi.Bool>)>();
 
   /// Determine this program is executed with admin.
-  bool is_elevated() {
-    return _is_elevated();
+  int is_elevated(
+    ffi.Pointer<ffi.Bool> result,
+  ) {
+    return _is_elevated(
+      result,
+    );
   }
 
   late final _is_elevatedPtr =
-      _lookup<ffi.NativeFunction<ffi.Bool Function()>>('is_elevated');
-  late final _is_elevated = _is_elevatedPtr.asFunction<bool Function()>();
+      _lookup<ffi.NativeFunction<ERRCODE Function(ffi.Pointer<ffi.Bool>)>>(
+          'is_elevated');
+  late final _is_elevated =
+      _is_elevatedPtr.asFunction<int Function(ffi.Pointer<ffi.Bool>)>();
 
   /// Obtain name of user.
   int get_current_username(
@@ -55,9 +67,9 @@ final class SuperuserPluginWindowsBindings {
   }
 
   late final _get_current_usernamePtr = _lookup<
-          ffi
-          .NativeFunction<DWORD Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>>(
-      'get_current_username');
+      ffi.NativeFunction<
+          ERRCODE Function(
+              ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('get_current_username');
   late final _get_current_username = _get_current_usernamePtr
       .asFunction<int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
 
@@ -77,5 +89,8 @@ final class SuperuserPluginWindowsBindings {
       _flush_stringPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
 }
 
+/// Returned value indicates the process result, which
+/// uses non-zero values to denotes problem during processing.
+typedef ERRCODE = DWORD;
 typedef DWORD = ffi.UnsignedLong;
 typedef DartDWORD = int;
