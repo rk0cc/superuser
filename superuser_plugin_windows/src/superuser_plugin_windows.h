@@ -19,7 +19,7 @@ FFI_PLUGIN_EXPORT ERRCODE is_elevated(bool* result);
 // Obtain name of user.
 FFI_PLUGIN_EXPORT ERRCODE get_current_username(char** result);
 
-/// Flush string from dynamic allocated function.
-FFI_PLUGIN_EXPORT void flush_string(char* str);
+/// Flush dynamic allocated function.
+FFI_PLUGIN_EXPORT void flush(void* ptr);
 
 #endif

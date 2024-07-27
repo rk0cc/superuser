@@ -6,6 +6,15 @@
 
 #define MAX_USERNAME_CHAR 256
 
+BOOL __wchar_to_utf8(WCHAR* wc, char** utf)
+{
+    int buf8_size = WideCharToMultiByte(CP_UTF8, 0, wc, -1, NULL, 0, NULL, NULL);
+
+    *utf = (char *) calloc(buf8_size, sizeof(char));
+
+    return WideCharToMultiByte(CP_UTF8, 0, wc, -1, *utf, buf8_size, NULL, NULL);
+}
+
 // Verify user who execute program has admin right.
 FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool* result)
 {
@@ -75,22 +84,18 @@ FFI_PLUGIN_EXPORT ERRCODE get_current_username(char** result)
     DWORD bufLen = sizeof(buffer) / sizeof(buffer[0]);
 
     SetLastError(0);
-
     if (!GetUserNameW(buffer, &bufLen))
         return GetLastError();
 
-    int buf8_size = WideCharToMultiByte(CP_UTF8, 0, buffer, -1, NULL, 0, NULL, NULL);
-
-    *result = (char *) calloc(buf8_size, sizeof(char));
-
-    if (!WideCharToMultiByte(CP_UTF8, 0, buffer, -1, *result, buf8_size, NULL, NULL))
+    SetLastError(0);
+    if (!__wchar_to_utf8(buffer, result))
         return GetLastError();
 
     return 0;
 }
 
-/// Flush string from dynamic allocated function.
-FFI_PLUGIN_EXPORT void flush_string(char* str)
+// Flush dynamic allocated function.
+FFI_PLUGIN_EXPORT void flush(void* ptr)
 {
-    free(str);
+    free(ptr);
 }
