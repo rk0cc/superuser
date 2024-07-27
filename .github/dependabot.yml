@@ -1,0 +1,8 @@
+version: 2
+updates:
+  - package-ecosystem: github-action
+    directory: "/"
+    schedule:
+      interval: monthly
+      time: "15:00"
+      timezone: "Asia/Hong_Kong"
