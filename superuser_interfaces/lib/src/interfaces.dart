@@ -3,8 +3,6 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 
-import 'user_group.dart';
-
 /// Shared interface for evaluating superuser status when
 /// executing Flutter program.
 abstract final class SuperuserInterface {
@@ -25,8 +23,8 @@ abstract final class SuperuserInterface {
   /// Retrive name of user, who run this program.
   String get whoAmI;
 
-  /// Obtains user as one of member of [Group]s.
-  Set<Group> get groups;
+  /// Obtains all groups name that this user is associated.
+  Iterable<String> get groups;
 }
 
 /// Platform specified [SuperuserInterface] to retrive properties from
@@ -103,7 +101,7 @@ final class MockSuperuser implements SuperuserInterface {
   final String whoAmI;
 
   @override
-  final Set<Group> groups;
+  final Set<String> groups;
 
   /// Create mocked properties of [SuperuserInterface] to emulate
   /// superuser status.
@@ -111,5 +109,5 @@ final class MockSuperuser implements SuperuserInterface {
       {this.isSuperuser = false,
       this.isActivated = false,
       this.whoAmI = "",
-      this.groups = const <Group>{}});
+      this.groups = const <String>{}});
 }
