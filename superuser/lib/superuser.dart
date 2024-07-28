@@ -53,4 +53,7 @@ abstract final class Superuser {
 
   /// Obtain username who call current program.
   static String get whoAmI => instance.whoAmI;
+
+  /// Obtain user's associated groups in local system.
+  static Iterable<String> get groups => instance.groups;
 }
