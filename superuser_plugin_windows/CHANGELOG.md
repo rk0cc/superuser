@@ -1,3 +1,7 @@
+## 2.0.0
+
+* Implement listing joined group for current user.
+
 ## 2.0.0-m.2
 
 * Fix incorrect configuration in CMakeLists.txt
