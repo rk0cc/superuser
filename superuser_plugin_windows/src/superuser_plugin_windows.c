@@ -25,10 +25,8 @@ ERRCODE __obtain_user_local_group(LPBYTE* gp, DWORD* entries, DWORD* total)
     if (!GetUserNameW(ubuf, &ubufLen))
         return GetLastError();
 
-    DWORD entries, total;
-
     NET_API_STATUS status;
-    status = NetUserGetLocalGroups(NULL, ubuf, 0, LG_INCLUDE_INDIRECT, *gp, MAX_PREFERRED_LENGTH, entries, total);
+    status = NetUserGetLocalGroups(NULL, ubuf, 0, LG_INCLUDE_INDIRECT, gp, MAX_PREFERRED_LENGTH, entries, total);
     if (status)
         return status;
 
@@ -38,7 +36,7 @@ ERRCODE __obtain_user_local_group(LPBYTE* gp, DWORD* entries, DWORD* total)
 // Verify user who execute program has admin right.
 FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool* result)
 {
-    *result = NULL;
+    result = NULL;
 
     LPBYTE buf;
     DWORD entries, total;
@@ -60,7 +58,7 @@ FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool* result)
         }
     }
 
-    *result = tmp_result;
+    result = &tmp_result;
 
     NetApiBufferFree(buf);
 
@@ -70,7 +68,7 @@ FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool* result)
 // Determine this program is executed with admin.
 FFI_PLUGIN_EXPORT ERRCODE is_elevated(bool* result)
 {
-    *result = NULL;
+    result = NULL;
     HANDLE token = NULL;
 
     SetLastError(0);
@@ -84,7 +82,9 @@ FFI_PLUGIN_EXPORT ERRCODE is_elevated(bool* result)
     if (!GetTokenInformation(token, TokenElevation, &elevation, sizeof elevation, &cbSize))
         return GetLastError();
 
-    *result = elevation.TokenIsElevated;
+    bool tmp_result = elevation.TokenIsElevated ? true : false;
+
+    result = &tmp_result;
 
     if (token)
         CloseHandle(token);
@@ -95,7 +95,7 @@ FFI_PLUGIN_EXPORT ERRCODE is_elevated(bool* result)
 // Obtain name of user.
 FFI_PLUGIN_EXPORT ERRCODE get_current_username(char** result)
 {
-    *result = NULL;
+    result = NULL;
 
     WCHAR buffer[MAX_USERNAME_CHAR];
     DWORD bufLen = sizeof(buffer) / sizeof(buffer[0]);
@@ -114,8 +114,8 @@ FFI_PLUGIN_EXPORT ERRCODE get_current_username(char** result)
 // Obtain user's associated group in local system.
 FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(char*** groups, DWORD* length)
 {
-    *groups = NULL;
-    *length = NULL;
+    groups = NULL;
+    length = NULL;
 
     LPBYTE buf;
     DWORD entries, total;
@@ -135,8 +135,8 @@ FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(char*** groups, DWORD* length)
 
     NetApiBufferFree(buf);
 
-    *length = entries;
-    *groups = tmp_groups;
+    length = &entries;
+    groups = &tmp_groups;
 
     return 0;
 }
