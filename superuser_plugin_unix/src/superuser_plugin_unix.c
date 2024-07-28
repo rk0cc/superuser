@@ -37,15 +37,15 @@ void __get_current_user_info(struct passwd **pw)
     *pw = getpwuid(uid);
 }
 
-void __get_pw_groups(struct passwd* pw, int *length, gid_t *groups)
+void __get_pw_groups(struct passwd* pw, int *length, gid_t **groups)
 {
     int ngps;
     getgrouplist(pw->pw_name, pw->pw_gid, NULL, &ngps);
-
     *length = ngps;
-    groups = (gid_t *)calloc(ngps, sizeof(gid_t));
 
-    getgrouplist(pw->pw_name, pw->pw_gid, groups, &ngps);
+    gid_t *tmp_groups = (gid_t *)calloc(ngps, sizeof(gid_t));
+    getgrouplist(pw->pw_name, pw->pw_gid, tmp_groups, &ngps);
+    *groups = tmp_groups;
 }
 
 int __sort_search_gid_compare(const void *a, const void *b)
@@ -91,10 +91,16 @@ FFI_PLUGIN_EXPORT ERRCODE is_sudo_group(bool *result)
     if (errno > 0)
         return __build_suunix_error_code(grouplist_err, errno);
 
-    qsort(gp_lists, ngps, sizeof(gid_t), __sort_search_gid_compare);
-    gid_t *search_result = (gid_t *)bsearch(&sudo_gpid, gp_lists, ngps, sizeof(gid_t), __sort_search_gid_compare);
+    bool found = false;
+    for (int i = 0; i < ngps; i++)
+    {
+        if (gp_lists[i] == sudo_gpid)
+        {
+            found = true;
+            break;
+        }
+    }
 
-    bool found = search_result != NULL;
     *result = found;
 
     free(gp_lists);

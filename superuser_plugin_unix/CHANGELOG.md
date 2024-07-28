@@ -1,6 +1,5 @@
 ## 2.0.0
 
-* Uses binary search to determine current user is in admin user group.
 * Implement current user associated groups.
 
 ## 2.0.0-m.2
