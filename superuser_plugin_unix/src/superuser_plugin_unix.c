@@ -3,6 +3,7 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 
 #include "superuser_plugin_unix.h"
@@ -37,7 +38,7 @@ void __get_current_user_info(struct passwd **pw)
     *pw = getpwuid(uid);
 }
 
-void __get_pw_groups(struct passwd* pw, int *length, gid_t **groups)
+void __get_pw_groups(struct passwd *pw, int *length, gid_t **groups)
 {
     int ngps;
     getgrouplist(pw->pw_name, pw->pw_gid, NULL, &ngps);
@@ -118,7 +119,7 @@ FFI_PLUGIN_EXPORT ERRCODE get_uname(char **result)
     if (!pw)
         return __build_suunix_error_code(pwuid_err, errno);
 
-    char* username = pw->pw_name;
+    char *username = pw->pw_name;
     *result = username;
 
     return 0;
@@ -141,27 +142,33 @@ FFI_PLUGIN_EXPORT ERRCODE get_groups(int *size, char ***groups)
     if (errno > 0)
         return __build_suunix_error_code(grouplist_err, errno);
 
+    /* These part is malfunction, waiting to fix. */
+
     char **user_gpnames = calloc(ngps, sizeof(char *));
 
+    errno = 0;
     for (int i = 0; i < ngps; i++)
     {
-        errno = 0;
         struct group *gp = getgrgid(gp_lists[i]);
 
         if (errno > 0)
-        {
-            free(user_gpnames);
-            free(gp_lists);
-            return __build_suunix_error_code(grgid_err, errno);
-        }
+            break;
 
         user_gpnames[i] = gp->gr_name;
     }
 
-    *size = ngps;
-    *groups = user_gpnames;
-
-    free(gp_lists);
+    if (errno > 0)
+    {
+        free(user_gpnames);
+        free(gp_lists);
+        return __build_suunix_error_code(grgid_err, errno);
+    }
+    else
+    {
+        *size = ngps;
+        *groups = user_gpnames;
+        free(gp_lists);
+    }
 
     return 0;
 }
