@@ -15,11 +15,8 @@ BOOL __wchar_to_utf8(WCHAR* wc, char** utf)
     return WideCharToMultiByte(CP_UTF8, 0, wc, -1, *utf, buf8_size, NULL, NULL);
 }
 
-// Verify user who execute program has admin right.
-FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool* result)
+ERRCODE __obtain_user_local_group(LPBYTE* gp, DWORD* entries, DWORD* total)
 {
-    *result = false;
-    
     WCHAR ubuf[MAX_USERNAME_CHAR];
     DWORD ubufLen = sizeof(ubuf) / sizeof(ubuf[0]);
 
@@ -28,24 +25,42 @@ FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool* result)
     if (!GetUserNameW(ubuf, &ubufLen))
         return GetLastError();
 
-    LPBYTE buf;
     DWORD entries, total;
 
     NET_API_STATUS status;
-    status = NetUserGetLocalGroups(NULL, ubuf, 0, LG_INCLUDE_INDIRECT, &buf, MAX_PREFERRED_LENGTH, &entries, &total);
+    status = NetUserGetLocalGroups(NULL, ubuf, 0, LG_INCLUDE_INDIRECT, *gp, MAX_PREFERRED_LENGTH, entries, total);
     if (status)
         return status;
 
+    return 0;
+}
+
+// Verify user who execute program has admin right.
+FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool* result)
+{
+    *result = NULL;
+
+    LPBYTE buf;
+    DWORD entries, total;
+
+    ERRCODE err = __obtain_user_local_group(&buf, &entries, &total);
+    if (err)
+        return err;
+
     LPCWSTR adminGpName = L"Administrators";
     LOCALGROUP_USERS_INFO_0* lg = (LOCALGROUP_USERS_INFO_0*) buf;
+    
+    bool tmp_result = false;
     for (DWORD i = 0; i < entries; i++)
     {
         if (wcscmp(adminGpName, lg[i].lgrui0_name) == 0)
         {
-            *result = true;
+            tmp_result = true;
             break;
         }
     }
+
+    *result = tmp_result;
 
     NetApiBufferFree(buf);
 
@@ -55,7 +70,7 @@ FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool* result)
 // Determine this program is executed with admin.
 FFI_PLUGIN_EXPORT ERRCODE is_elevated(bool* result)
 {
-    *result = false;
+    *result = NULL;
     HANDLE token = NULL;
 
     SetLastError(0);
@@ -80,6 +95,8 @@ FFI_PLUGIN_EXPORT ERRCODE is_elevated(bool* result)
 // Obtain name of user.
 FFI_PLUGIN_EXPORT ERRCODE get_current_username(char** result)
 {
+    *result = NULL;
+
     WCHAR buffer[MAX_USERNAME_CHAR];
     DWORD bufLen = sizeof(buffer) / sizeof(buffer[0]);
 
@@ -90,6 +107,36 @@ FFI_PLUGIN_EXPORT ERRCODE get_current_username(char** result)
     SetLastError(0);
     if (!__wchar_to_utf8(buffer, result))
         return GetLastError();
+
+    return 0;
+}
+
+// Obtain user's associated group in local system.
+FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(char*** groups, DWORD* length)
+{
+    *groups = NULL;
+    *length = NULL;
+
+    LPBYTE buf;
+    DWORD entries, total;
+
+    ERRCODE err = __obtain_user_local_group(&buf, &entries, &total);
+    if (err)
+        return err;
+
+    char** tmp_groups = (char**) calloc(entries, sizeof(char*));
+
+    LOCALGROUP_USERS_INFO_0* lg = (LOCALGROUP_USERS_INFO_0*) buf;
+    for (DWORD i = 0; i < entries; i++)
+    {
+        if (!__wchar_to_utf8(lg[i].lgrui0_name, &tmp_groups[i]))
+            return GetLastError();
+    }
+
+    NetApiBufferFree(buf);
+
+    *length = entries;
+    *groups = tmp_groups;
 
     return 0;
 }

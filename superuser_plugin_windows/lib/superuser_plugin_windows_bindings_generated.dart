@@ -73,20 +73,39 @@ final class SuperuserPluginWindowsBindings {
   late final _get_current_username = _get_current_usernamePtr
       .asFunction<int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
 
-  /// Flush string from dynamic allocated function.
-  void flush_string(
-    ffi.Pointer<ffi.Char> str,
+  /// Obtain user's associated group in local system.
+  int get_associated_groups(
+    ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>> groups,
+    ffi.Pointer<DWORD> length,
   ) {
-    return _flush_string(
-      str,
+    return _get_associated_groups(
+      groups,
+      length,
     );
   }
 
-  late final _flush_stringPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Char>)>>(
-          'flush_string');
-  late final _flush_string =
-      _flush_stringPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
+  late final _get_associated_groupsPtr = _lookup<
+      ffi.NativeFunction<
+          ERRCODE Function(ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>>,
+              ffi.Pointer<DWORD>)>>('get_associated_groups');
+  late final _get_associated_groups = _get_associated_groupsPtr.asFunction<
+      int Function(ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>>,
+          ffi.Pointer<DWORD>)>();
+
+  /// Flush dynamic allocated function.
+  void flush(
+    ffi.Pointer<ffi.Void> ptr,
+  ) {
+    return _flush(
+      ptr,
+    );
+  }
+
+  late final _flushPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+          'flush');
+  late final _flush =
+      _flushPtr.asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 }
 
 /// Returned value indicates the process result, which

@@ -19,6 +19,9 @@ FFI_PLUGIN_EXPORT ERRCODE is_elevated(bool* result);
 // Obtain name of user.
 FFI_PLUGIN_EXPORT ERRCODE get_current_username(char** result);
 
+// Obtain user's associated group in local system.
+FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(char*** groups, DWORD* length);
+
 /// Flush dynamic allocated function.
 FFI_PLUGIN_EXPORT void flush(void* ptr);
 
