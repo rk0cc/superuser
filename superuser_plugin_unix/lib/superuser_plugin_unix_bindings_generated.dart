@@ -70,6 +70,40 @@ final class SuperuserPluginUnixBindings {
           ERRCODE Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('get_uname');
   late final _get_uname = _get_unamePtr
       .asFunction<int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
+
+  /// Obtain all associated group for current user.
+  int get_groups(
+    ffi.Pointer<ffi.Int> size,
+    ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>> groups,
+  ) {
+    return _get_groups(
+      size,
+      groups,
+    );
+  }
+
+  late final _get_groupsPtr = _lookup<
+      ffi.NativeFunction<
+          ERRCODE Function(ffi.Pointer<ffi.Int>,
+              ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>>)>>('get_groups');
+  late final _get_groups = _get_groupsPtr.asFunction<
+      int Function(ffi.Pointer<ffi.Int>,
+          ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>>)>();
+
+  /// Flush dynamic allocated pointers.
+  void flush(
+    ffi.Pointer<ffi.Void> ptr,
+  ) {
+    return _flush(
+      ptr,
+    );
+  }
+
+  late final _flushPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+          'flush');
+  late final _flush =
+      _flushPtr.asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 }
 
 typedef ERRCODE = ffi.UnsignedInt;

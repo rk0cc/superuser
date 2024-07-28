@@ -15,9 +15,15 @@ FFI_PLUGIN_EXPORT bool is_root();
 //
 // This method requires sudo bundled in OS already. Normally, majority of UNIX or liked
 // system.
-FFI_PLUGIN_EXPORT ERRCODE is_sudo_group(bool* result);
+FFI_PLUGIN_EXPORT ERRCODE is_sudo_group(bool *result);
 
 // Obtain name of user.
-FFI_PLUGIN_EXPORT ERRCODE get_uname(char** result);
+FFI_PLUGIN_EXPORT ERRCODE get_uname(char **result);
+
+// Obtain all associated group for current user.
+FFI_PLUGIN_EXPORT ERRCODE get_groups(int *size, char ***groups);
+
+// Flush dynamic allocated pointers.
+FFI_PLUGIN_EXPORT void flush(void *ptr);
 
 #endif
