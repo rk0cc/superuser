@@ -58,6 +58,28 @@ class Context extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void onDisplayingGroups() async {
+      await showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            List<String> gpList = Superuser.groups.toList(growable: false);
+
+            return AlertDialog(
+                title: const Text("Groups"),
+                content:
+                    Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                  Text("Total joined groups: ${gpList.length}"),
+                  SizedBox(
+                      width: 400,
+                      height: 275,
+                      child: ListView.builder(
+                          itemBuilder: (context, index) =>
+                              ListTile(title: Text(gpList[index]))))
+                ]));
+          });
+    }
+
     return Scaffold(
         appBar: AppBar(title: const Text("Superuser")),
         drawer: Drawer(
@@ -121,7 +143,13 @@ class Context extends StatelessWidget {
                   child: ListTile(
                       title: const Text("Run as superuser", style: _titleStyle),
                       trailing: Text(Superuser.isActivated ? "Yes" : "No",
-                          style: _valueStyle)))
+                          style: _valueStyle))),
+              const Divider(),
+              ListTile(
+                  title: const Text("Group"),
+                  trailing: ElevatedButton(
+                      onPressed: onDisplayingGroups,
+                      child: const Text("List all joined groups")))
             ]));
   }
 }

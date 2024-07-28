@@ -16,5 +16,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+dependency_overrides:
+  superuser_plugin_unix:
+    path: ../../superuser_plugin_unix
+  superuser_plugin_windows:
+    path: ../../superuser_plugin_windows
 flutter:
   uses-material-design: true
