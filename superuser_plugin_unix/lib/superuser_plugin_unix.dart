@@ -79,4 +79,31 @@ final class UnixSuperuser extends SuperuserPlatform {
           ffi.calloc.free(resultPtr);
         }
       });
+
+  @override
+  Iterable<String> get groups => onGettingProperties((lib) sync* {
+    final SuperuserPluginUnixBindings bindings = SuperuserPluginUnixBindings(lib);
+
+    Pointer<Pointer<Pointer<Char>>> gps = ffi.calloc<Pointer<Pointer<Char>>>();
+    Pointer<Int> size = ffi.calloc<Int>();
+
+    try {
+      int errCode = bindings.get_groups(size, gps);
+      if (errCode > 0) {
+        throw SuperuserProcessError(errCode, "Unable to obtain current user's associated groups.");
+      }
+
+      Pointer<Pointer<Char>> gpPtrArr = gps.value;
+
+      try {
+        for (int i = 0; i < size.value; i++) {
+          yield gpPtrArr[i].cast<ffi.Utf8>().toDartString();
+        }
+      } finally {
+        bindings.flush(gpPtrArr.cast<Void>());
+      }
+    } finally {
+      [gps, size].forEach(ffi.calloc.free);
+    }
+  });
 }
