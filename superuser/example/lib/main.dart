@@ -74,9 +74,15 @@ class Context extends StatelessWidget {
                       width: 400,
                       height: 275,
                       child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: gpList.length,
                           itemBuilder: (context, index) =>
                               ListTile(title: Text(gpList[index]))))
-                ]));
+                ]), actions: <TextButton>[
+                  TextButton(onPressed: () {
+                    Navigator.pop(context);
+                  }, child: const Text("OK"))
+                ],);
           });
     }
 
