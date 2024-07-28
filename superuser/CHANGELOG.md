@@ -1,3 +1,7 @@
+## 2.0.0
+
+* Add user's joined group in local machine scope.
+
 ## 2.0.0-m.1
 
 * `isSuperuser` can returns true without superuser permission activated.
