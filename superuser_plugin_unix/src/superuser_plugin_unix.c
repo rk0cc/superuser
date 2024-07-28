@@ -66,6 +66,8 @@ FFI_PLUGIN_EXPORT bool is_root()
 // system.
 FFI_PLUGIN_EXPORT ERRCODE is_sudo_group(bool *result)
 {
+    result = NULL;
+
     char *sudo_gpname = DEFAULT_UNIX_SUDO_GP;
     struct group *gp;
 
@@ -94,7 +96,8 @@ FFI_PLUGIN_EXPORT ERRCODE is_sudo_group(bool *result)
     qsort(gp_lists, ngps, sizeof(gid_t), __sort_search_gid_compare);
     gid_t *search_result = (gid_t *)bsearch(&sudo_gpid, gp_lists, ngps, sizeof(gid_t), __sort_search_gid_compare);
 
-    *result = search_result != NULL;
+    bool found = search_result != NULL;
+    result = &found;
 
     free(gp_lists);
 
@@ -104,6 +107,8 @@ FFI_PLUGIN_EXPORT ERRCODE is_sudo_group(bool *result)
 // Obtain name of user.
 FFI_PLUGIN_EXPORT ERRCODE get_uname(char **result)
 {
+    result = NULL;
+
     struct passwd *pw;
     errno = 0;
     __get_current_user_info(&pw);
@@ -111,7 +116,8 @@ FFI_PLUGIN_EXPORT ERRCODE get_uname(char **result)
     if (!pw)
         return __build_suunix_error_code(pwuid_err, errno);
 
-    *result = pw->pw_name;
+    char* username = pw->pw_name;
+    result = &username;
 
     return 0;
 }
@@ -119,6 +125,9 @@ FFI_PLUGIN_EXPORT ERRCODE get_uname(char **result)
 // Obtain all associated group for current user.
 FFI_PLUGIN_EXPORT ERRCODE get_groups(int *size, char ***groups)
 {
+    size = NULL;
+    groups = NULL;
+
     struct passwd *pw;
     errno = 0;
     __get_current_user_info(&pw);
@@ -150,8 +159,8 @@ FFI_PLUGIN_EXPORT ERRCODE get_groups(int *size, char ***groups)
         user_gpnames[i] = gp->gr_name;
     }
 
-    *size = ngps;
-    *groups = user_gpnames;
+    size = &ngps;
+    groups = &user_gpnames;
 
     free(gp_lists);
 
