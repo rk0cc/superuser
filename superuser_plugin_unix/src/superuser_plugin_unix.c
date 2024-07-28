@@ -31,21 +31,21 @@ static ERRCODE __build_suunix_error_code(error_causes causes, int error_code)
 }
 
 // Common method to obtain current user structure.
-void __get_current_user_info(struct passwd *pw)
+void __get_current_user_info(struct passwd **pw)
 {
     uid_t uid = geteuid();
-    pw = getpwuid(uid);
+    *pw = getpwuid(uid);
 }
 
-void __get_pw_groups(struct passwd pw, int *length, gid_t *groups)
+void __get_pw_groups(struct passwd* pw, int *length, gid_t *groups)
 {
     int ngps;
-    getgrouplist(pw.pw_name, pw.pw_gid, NULL, &ngps);
+    getgrouplist(pw->pw_name, pw->pw_gid, NULL, &ngps);
 
     *length = ngps;
     groups = (gid_t *)calloc(ngps, sizeof(gid_t));
 
-    getgrouplist(pw.pw_name, pw.pw_gid, groups, &ngps);
+    getgrouplist(pw->pw_name, pw->pw_gid, groups, &ngps);
 }
 
 int __sort_search_gid_compare(const void *a, const void *b)
@@ -87,7 +87,7 @@ FFI_PLUGIN_EXPORT ERRCODE is_sudo_group(bool *result)
     int ngps;
     gid_t *gp_lists;
     errno = 0;
-    __get_pw_groups(*pw, &ngps, &gp_lists);
+    __get_pw_groups(pw, &ngps, &gp_lists);
     if (errno > 0)
         return __build_suunix_error_code(grouplist_err, errno);
 
@@ -131,7 +131,7 @@ FFI_PLUGIN_EXPORT ERRCODE get_groups(int *size, char ***groups)
     int ngps;
     gid_t *gp_lists;
     errno = 0;
-    __get_pw_groups(*pw, &ngps, &gp_lists);
+    __get_pw_groups(pw, &ngps, &gp_lists);
     if (errno > 0)
         return __build_suunix_error_code(grouplist_err, errno);
 
