@@ -223,16 +223,18 @@ packages:
   superuser_plugin_unix:
     dependency: transitive
     description:
-      path: "../../superuser_plugin_unix"
-      relative: true
-    source: path
+      name: superuser_plugin_unix
+      sha256: f8e973a6c503a161f61ccf1a246d91da6a912f0c33ac5d631d65de14ed85b8cd
+      url: "https://pub.dev"
+    source: hosted
     version: "2.0.0"
   superuser_plugin_windows:
     dependency: transitive
     description:
-      path: "../../superuser_plugin_windows"
-      relative: true
-    source: path
+      name: superuser_plugin_windows
+      sha256: ec570cc0911be639b24b39ff2c3c1e2583a6364e5db3dfb236c5cfdd35d85b6b
+      url: "https://pub.dev"
+    source: hosted
     version: "2.0.0"
   term_glyph:
     dependency: transitive
