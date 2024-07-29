@@ -82,28 +82,38 @@ final class UnixSuperuser extends SuperuserPlatform {
 
   @override
   Iterable<String> get groups => onGettingProperties((lib) sync* {
-    final SuperuserPluginUnixBindings bindings = SuperuserPluginUnixBindings(lib);
+        final SuperuserPluginUnixBindings bindings =
+            SuperuserPluginUnixBindings(lib);
 
-    Pointer<Pointer<Pointer<Char>>> gps = ffi.calloc<Pointer<Pointer<Char>>>();
-    Pointer<Int> size = ffi.calloc<Int>();
+        Pointer<Pointer<gid_t>> gps = ffi.calloc<Pointer<gid_t>>();
+        Pointer<Int> size = ffi.calloc<Int>();
 
-    try {
-      int errCode = bindings.get_groups(size, gps);
-      if (errCode > 0) {
-        throw SuperuserProcessError(errCode, "Unable to obtain current user's associated groups.");
-      }
+        try {
+          int errCode = bindings.get_current_user_group(size, gps);
+          if (errCode > 0) {
+            throw SuperuserProcessError(
+                errCode, "Unable to obtain current user's associated groups.");
+          }
 
-      Pointer<Pointer<Char>> gpPtrArr = gps.value;
+          Pointer<gid_t> gids = gps.value;
+          Pointer<Pointer<Char>> gpName = ffi.calloc<Pointer<Char>>();
 
-      try {
-        for (int i = 0; i < size.value; i++) {
-          yield gpPtrArr[i].cast<ffi.Utf8>().toDartString();
+          try {
+            for (int i = 0; i < size.value; i++) {
+              int nameErrCode = bindings.get_group_name_by_gid(gids[i], gpName);
+              if (nameErrCode > 0) {
+                throw SuperuserProcessError(
+                    nameErrCode, "Failed to list group name.");
+              }
+
+              yield gpName.value.cast<ffi.Utf8>().toDartString();
+            }
+          } finally {
+            ffi.calloc.free(gpName);
+            bindings.flush(gids.cast<Void>());
+          }
+        } finally {
+          [gps, size].forEach(ffi.calloc.free);
         }
-      } finally {
-        bindings.flush(gpPtrArr.cast<Void>());
-      }
-    } finally {
-      [gps, size].forEach(ffi.calloc.free);
-    }
-  });
+      });
 }

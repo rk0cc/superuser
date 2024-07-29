@@ -28,6 +28,57 @@ final class SuperuserPluginUnixBindings {
           lookup)
       : _lookup = lookup;
 
+  /// Obtain name of user.
+  int get_uname(
+    ffi.Pointer<ffi.Pointer<ffi.Char>> result,
+  ) {
+    return _get_uname(
+      result,
+    );
+  }
+
+  late final _get_unamePtr = _lookup<
+      ffi.NativeFunction<
+          ERRCODE Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('get_uname');
+  late final _get_uname = _get_unamePtr
+      .asFunction<int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
+
+  /// Obtain all associated group for current user.
+  int get_current_user_group(
+    ffi.Pointer<ffi.Int> size,
+    ffi.Pointer<ffi.Pointer<gid_t>> groups,
+  ) {
+    return _get_current_user_group(
+      size,
+      groups,
+    );
+  }
+
+  late final _get_current_user_groupPtr = _lookup<
+      ffi.NativeFunction<
+          ERRCODE Function(ffi.Pointer<ffi.Int>,
+              ffi.Pointer<ffi.Pointer<gid_t>>)>>('get_current_user_group');
+  late final _get_current_user_group = _get_current_user_groupPtr.asFunction<
+      int Function(ffi.Pointer<ffi.Int>, ffi.Pointer<ffi.Pointer<gid_t>>)>();
+
+  /// Resolve name of group from given ID number.
+  int get_group_name_by_gid(
+    int group_id,
+    ffi.Pointer<ffi.Pointer<ffi.Char>> result,
+  ) {
+    return _get_group_name_by_gid(
+      group_id,
+      result,
+    );
+  }
+
+  late final _get_group_name_by_gidPtr = _lookup<
+      ffi.NativeFunction<
+          ERRCODE Function(gid_t,
+              ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('get_group_name_by_gid');
+  late final _get_group_name_by_gid = _get_group_name_by_gidPtr
+      .asFunction<int Function(int, ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
+
   /// Determine user who execute this program is root.
   bool is_root() {
     return _is_root();
@@ -56,40 +107,6 @@ final class SuperuserPluginUnixBindings {
   late final _is_sudo_group =
       _is_sudo_groupPtr.asFunction<int Function(ffi.Pointer<ffi.Bool>)>();
 
-  /// Obtain name of user.
-  int get_uname(
-    ffi.Pointer<ffi.Pointer<ffi.Char>> result,
-  ) {
-    return _get_uname(
-      result,
-    );
-  }
-
-  late final _get_unamePtr = _lookup<
-      ffi.NativeFunction<
-          ERRCODE Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('get_uname');
-  late final _get_uname = _get_unamePtr
-      .asFunction<int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
-
-  /// Obtain all associated group for current user.
-  int get_groups(
-    ffi.Pointer<ffi.Int> size,
-    ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>> groups,
-  ) {
-    return _get_groups(
-      size,
-      groups,
-    );
-  }
-
-  late final _get_groupsPtr = _lookup<
-      ffi.NativeFunction<
-          ERRCODE Function(ffi.Pointer<ffi.Int>,
-              ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>>)>>('get_groups');
-  late final _get_groups = _get_groupsPtr.asFunction<
-      int Function(ffi.Pointer<ffi.Int>,
-          ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>>)>();
-
   /// Flush dynamic allocated pointers.
   void flush(
     ffi.Pointer<ffi.Void> ptr,
@@ -108,3 +125,6 @@ final class SuperuserPluginUnixBindings {
 
 typedef ERRCODE = ffi.UnsignedInt;
 typedef DartERRCODE = int;
+typedef gid_t = __gid_t;
+typedef __gid_t = ffi.UnsignedInt;
+typedef Dart__gid_t = int;
