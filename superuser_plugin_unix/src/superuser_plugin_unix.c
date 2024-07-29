@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 
 #include "superuser_plugin_unix.h"
 
@@ -21,9 +20,9 @@
 typedef enum _error_causes
 {
     pwuid_err = 1,
-    grnam_err = 2,
-    grouplist_err = 3,
-    grgid_err = 4
+    grnam_err,
+    grouplist_err,
+    grgid_err
 } error_causes;
 
 static ERRCODE __build_suunix_error_code(error_causes causes, int error_code)
@@ -41,17 +40,73 @@ void __get_current_user_info(struct passwd **pw)
 void __get_pw_groups(struct passwd *pw, int *length, gid_t **groups)
 {
     int ngps;
-    getgrouplist(pw->pw_name, pw->pw_gid, NULL, &ngps);
-    *length = ngps;
+    long max_ngps = sysconf(_SC_NGROUPS_MAX) + 1;
+    gid_t *tmp_groups = (gid_t *)calloc(max_ngps, sizeof(gid_t));
 
-    gid_t *tmp_groups = (gid_t *)calloc(ngps, sizeof(gid_t));
-    getgrouplist(pw->pw_name, pw->pw_gid, tmp_groups, &ngps);
+    ngps = getgroups(max_ngps, tmp_groups);
+    
+    *length = ngps;
     *groups = tmp_groups;
 }
 
 int __sort_search_gid_compare(const void *a, const void *b)
 {
     return (*(gid_t *)a - *(gid_t *)b);
+}
+
+// Obtain name of user.
+FFI_PLUGIN_EXPORT ERRCODE get_uname(char **result)
+{
+    struct passwd *pw;
+    errno = 0;
+    __get_current_user_info(&pw);
+
+    if (!pw)
+        return __build_suunix_error_code(pwuid_err, errno);
+
+    char *username = pw->pw_name;
+    *result = username;
+
+    return 0;
+}
+
+// Obtain all associated group for current user.
+FFI_PLUGIN_EXPORT ERRCODE get_current_user_group(int *size, gid_t **groups)
+{
+    struct passwd *pw;
+    errno = 0;
+    __get_current_user_info(&pw);
+
+    if (!pw)
+        return __build_suunix_error_code(pwuid_err, errno);
+
+    int ngps;
+    gid_t *gp_lists;
+    errno = 0;
+    __get_pw_groups(pw, &ngps, &gp_lists);
+    if (ngps == -1 || errno > 0)
+    {
+        free(gp_lists);
+        return __build_suunix_error_code(grouplist_err, errno);
+    }
+
+    *size = ngps;
+    *groups = gp_lists;
+
+    return 0;
+}
+
+// Resolve name of group from given ID number.
+FFI_PLUGIN_EXPORT ERRCODE get_group_name_by_gid(gid_t group_id, char **result)
+{
+    errno = 0;
+    struct group* gp = getgrgid(group_id);
+    if (!gp)
+        return __build_suunix_error_code(grgid_err, errno);
+
+    *result = gp->gr_name;
+
+    return 0;
 }
 
 // Determine user who execute this program is root.
@@ -78,97 +133,19 @@ FFI_PLUGIN_EXPORT ERRCODE is_sudo_group(bool *result)
     // As key of bsearch
     gid_t sudo_gpid = gp->gr_gid;
 
-    struct passwd *pw;
-    errno = 0;
-    __get_current_user_info(&pw);
-
-    if (!pw)
-        return __build_suunix_error_code(pwuid_err, errno);
-
-    int ngps;
     gid_t *gp_lists;
-    errno = 0;
-    __get_pw_groups(pw, &ngps, &gp_lists);
-    if (errno > 0)
-        return __build_suunix_error_code(grouplist_err, errno);
+    int ngps;
+    ERRCODE gp_list_err = get_current_user_group(&ngps, &gp_lists);
 
-    bool found = false;
-    for (int i = 0; i < ngps; i++)
-    {
-        if (gp_lists[i] == sudo_gpid)
-        {
-            found = true;
-            break;
-        }
-    }
+    if (gp_list_err > 0)
+        return gp_list_err;
 
-    *result = found;
+    qsort(gp_lists, ngps, sizeof(gid_t), __sort_search_gid_compare);
+    gid_t *found = (gid_t *)bsearch(&sudo_gpid, gp_lists, ngps, sizeof(gid_t), __sort_search_gid_compare);
+
+    *result = found != NULL;
 
     free(gp_lists);
-
-    return 0;
-}
-
-// Obtain name of user.
-FFI_PLUGIN_EXPORT ERRCODE get_uname(char **result)
-{
-    struct passwd *pw;
-    errno = 0;
-    __get_current_user_info(&pw);
-
-    if (!pw)
-        return __build_suunix_error_code(pwuid_err, errno);
-
-    char *username = pw->pw_name;
-    *result = username;
-
-    return 0;
-}
-
-// Obtain all associated group for current user.
-FFI_PLUGIN_EXPORT ERRCODE get_groups(int *size, char ***groups)
-{
-    struct passwd *pw;
-    errno = 0;
-    __get_current_user_info(&pw);
-
-    if (!pw)
-        return __build_suunix_error_code(pwuid_err, errno);
-
-    int ngps;
-    gid_t *gp_lists;
-    errno = 0;
-    __get_pw_groups(pw, &ngps, &gp_lists);
-    if (errno > 0)
-        return __build_suunix_error_code(grouplist_err, errno);
-
-    /* These part is malfunction, waiting to fix. */
-
-    char **user_gpnames = calloc(ngps, sizeof(char *));
-
-    errno = 0;
-    for (int i = 0; i < ngps; i++)
-    {
-        struct group *gp = getgrgid(gp_lists[i]);
-
-        if (errno > 0)
-            break;
-
-        user_gpnames[i] = gp->gr_name;
-    }
-
-    if (errno > 0)
-    {
-        free(user_gpnames);
-        free(gp_lists);
-        return __build_suunix_error_code(grgid_err, errno);
-    }
-    else
-    {
-        *size = ngps;
-        *groups = user_gpnames;
-        free(gp_lists);
-    }
 
     return 0;
 }
