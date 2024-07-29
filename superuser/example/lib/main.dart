@@ -66,23 +66,27 @@ class Context extends StatelessWidget {
             List<String> gpList = Superuser.groups.toList(growable: false);
 
             return AlertDialog(
-                title: const Text("Groups"),
-                content:
-                    Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-                  Text("Total joined groups: ${gpList.length}"),
-                  SizedBox(
-                      width: 400,
-                      height: 275,
-                      child: ListView.builder(
+              title: const Text("Groups"),
+              content:
+                  Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                Text("Total joined groups: ${gpList.length}"),
+                SizedBox(
+                    width: 400,
+                    height: 275,
+                    child: ListView.builder(
                         shrinkWrap: true,
                         itemCount: gpList.length,
-                          itemBuilder: (context, index) =>
-                              ListTile(title: Text(gpList[index]))))
-                ]), actions: <TextButton>[
-                  TextButton(onPressed: () {
-                    Navigator.pop(context);
-                  }, child: const Text("OK"))
-                ],);
+                        itemBuilder: (context, index) =>
+                            ListTile(title: Text(gpList[index]))))
+              ]),
+              actions: <TextButton>[
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text("OK"))
+              ],
+            );
           });
     }
 
