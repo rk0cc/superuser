@@ -1,96 +1,140 @@
+#include <Windows.h>
+#include <LM.h>
 #include <stdlib.h>
 
 #include "superuser_plugin_windows.h"
 
-#define MAX_USERNAME_CHAR 257
+#define MAX_USERNAME_CHAR 256
 
-// Verify user who execute program has admin right.
-FFI_PLUGIN_EXPORT bool is_admin_user()
+BOOL __wchar_to_utf8(WCHAR* wc, char** utf)
 {
-    BOOL admin;
-    SID_IDENTIFIER_AUTHORITY ntAuth = SECURITY_NT_AUTHORITY;
-    PSID adminGP;
+    int buf8_size = WideCharToMultiByte(CP_UTF8, 0, wc, -1, NULL, 0, NULL, NULL);
 
-    admin = AllocateAndInitializeSid(
-        &ntAuth,
-        2,
-        SECURITY_BUILTIN_DOMAIN_RID,
-        DOMAIN_ALIAS_RID_ADMINS,
-        0, 0, 0, 0, 0, 0,
-        &adminGP
-    );
+    *utf = (char *) calloc(buf8_size, sizeof(char));
 
-    if (admin)
-    {
-        if (!CheckTokenMembership(NULL, adminGP, &admin))
-        {
-            admin = FALSE;
-        }
-
-        FreeSid(adminGP);
-    }
-
-    return admin;
+    return WideCharToMultiByte(CP_UTF8, 0, wc, -1, *utf, buf8_size, NULL, NULL);
 }
 
-// Determine this program is executed with admin.
-FFI_PLUGIN_EXPORT bool is_elevated()
+ERRCODE __obtain_user_local_group(LPBYTE* gp, DWORD* entries, DWORD* total)
 {
-    BOOL ret = FALSE;
-    HANDLE token = NULL;
-
-    if (OpenProcessToken(
-        GetCurrentProcess(),
-        TOKEN_QUERY,
-        &token
-    ))
-    {
-        TOKEN_ELEVATION elevation;
-        DWORD cbSize = sizeof(TOKEN_ELEVATION);
-
-        if (GetTokenInformation(
-            token, 
-            TokenElevation, 
-            &elevation,
-            sizeof elevation,
-            &cbSize
-        ))
-        {
-            ret = elevation.TokenIsElevated;
-        }
-    }
-
-    if (token)
-    {
-        CloseHandle(token);
-    }
-
-    return ret;
-}
-
-// Obtain name of user.
-FFI_PLUGIN_EXPORT DWORD get_current_username(char** result)
-{
-    WCHAR buffer[MAX_USERNAME_CHAR];
-    DWORD bufLen = MAX_USERNAME_CHAR;
+    WCHAR ubuf[MAX_USERNAME_CHAR];
+    DWORD ubufLen = sizeof(ubuf) / sizeof(ubuf[0]);
 
     SetLastError(0);
 
+    if (!GetUserNameW(ubuf, &ubufLen))
+        return GetLastError();
+
+    NET_API_STATUS status;
+    status = NetUserGetLocalGroups(NULL, ubuf, 0, LG_INCLUDE_INDIRECT, gp, MAX_PREFERRED_LENGTH, entries, total);
+    if (status)
+        return status;
+
+    return 0;
+}
+
+// Verify user who execute program has admin right.
+FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool* result)
+{
+    LPBYTE buf;
+    DWORD entries, total;
+
+    ERRCODE err = __obtain_user_local_group(&buf, &entries, &total);
+    if (err)
+        return err;
+
+    LPCWSTR adminGpName = L"Administrators";
+    LOCALGROUP_USERS_INFO_0* lg = (LOCALGROUP_USERS_INFO_0*) buf;
+    
+    bool tmp_result = false;
+    for (DWORD i = 0; i < entries; i++)
+    {
+        if (wcscmp(adminGpName, lg[i].lgrui0_name) == 0)
+        {
+            tmp_result = true;
+            break;
+        }
+    }
+
+    *result = tmp_result;
+
+    NetApiBufferFree(buf);
+
+    return 0;
+}
+
+// Determine this program is executed with admin.
+FFI_PLUGIN_EXPORT ERRCODE is_elevated(bool* result)
+{
+    HANDLE token;
+
+    SetLastError(0);
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token))
+        return GetLastError();
+    
+    TOKEN_ELEVATION elevation;
+    DWORD cbSize = sizeof(TOKEN_ELEVATION);
+
+    SetLastError(0);
+    if (!GetTokenInformation(token, TokenElevation, &elevation, sizeof elevation, &cbSize))
+        return GetLastError();
+
+    bool tmp_result = elevation.TokenIsElevated ? true : false;
+
+    *result = tmp_result;
+
+    if (token)
+        CloseHandle(token);
+
+    return 0;
+}
+
+// Obtain name of user.
+FFI_PLUGIN_EXPORT ERRCODE get_current_username(char** result)
+{
+    WCHAR buffer[MAX_USERNAME_CHAR];
+    DWORD bufLen = sizeof(buffer) / sizeof(buffer[0]);
+
+    SetLastError(0);
     if (!GetUserNameW(buffer, &bufLen))
         return GetLastError();
 
-    int buf8_size = WideCharToMultiByte(CP_UTF8, 0, buffer, -1, NULL, 0, NULL, NULL);
-
-    *result = (char *) calloc(buf8_size, sizeof(char));
-
-    if (!WideCharToMultiByte(CP_UTF8, 0, buffer, -1, *result, buf8_size, NULL, NULL))
+    SetLastError(0);
+    if (!__wchar_to_utf8(buffer, result))
         return GetLastError();
 
     return 0;
 }
 
-/// Flush string from dynamic allocated function.
-FFI_PLUGIN_EXPORT void flush_string(char* str)
+// Obtain user's associated group in local system.
+FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(char*** groups, DWORD* length)
 {
-    free(str);
+    LPBYTE buf;
+    DWORD entries, total;
+
+    ERRCODE err = __obtain_user_local_group(&buf, &entries, &total);
+    if (err)
+        return err;
+
+    char** tmp_groups = (char**) calloc(entries, sizeof(char*));
+
+    LOCALGROUP_USERS_INFO_0* lg = (LOCALGROUP_USERS_INFO_0*) buf;
+    for (DWORD i = 0; i < entries; i++)
+    {
+        if (!__wchar_to_utf8(lg[i].lgrui0_name, &tmp_groups[i]))
+            return GetLastError();
+    }
+
+    NetApiBufferFree(buf);
+
+    *length = entries;
+    *groups = tmp_groups;
+
+    return 0;
+}
+
+// Flush dynamic allocated function.
+FFI_PLUGIN_EXPORT void flush(void* ptr)
+{
+    free(ptr);
 }

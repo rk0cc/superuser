@@ -27,19 +27,33 @@ abstract final class Superuser {
   const Superuser._();
 
   /// Determine this program is executed by a user, who is superuser exactly or
-  /// one of members in superuser group.
+  /// one of members in superuser group that it is possible to toggle [isActivated]
+  /// (it can be executed with restricted permission that making [isActivated] retains
+  /// false).
+  ///
+  /// For UNIX platform, it returns true if user who execute this program is `root`
+  /// or a member of built-in group that can uses `sudo` command. (`admin` for macOS
+  /// or `sudo` for majority of Linux systems).
+  ///
+  /// In Windows, it returns true if current user is a member of `Administrators`
+  /// group in local machine. This detection does not consider Active Directory
+  /// users.
   static bool get isSuperuser => instance.isSuperuser;
 
-  /// Determine this program is running with superuser role.
+  /// Determine this program is running with superuser role that it can
+  /// access and modify protected location programmatically.
   ///
-  /// If this getter called in UNIX platforms (macOS or Linux),
-  /// it is an alias getter of [isSuperuser] since `root` is one and only
-  /// user can be represented as superuser.
+  /// UNIX platforms (macOS and Linux) only consider executor is `root`,
+  /// whatever how this program called.
   ///
   /// For Windows platform, it consider this process has been elevated
-  /// or not.
+  /// or not, which should be positive if and only if user granted UAC
+  /// prompt.
   static bool get isActivated => instance.isActivated;
 
   /// Obtain username who call current program.
   static String get whoAmI => instance.whoAmI;
+
+  /// Obtain user's associated groups in local system.
+  static Iterable<String> get groups => instance.groups;
 }

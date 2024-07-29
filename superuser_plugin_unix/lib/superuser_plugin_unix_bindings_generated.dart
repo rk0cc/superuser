@@ -1,6 +1,7 @@
 // ignore_for_file: always_specify_types
 // ignore_for_file: camel_case_types
 // ignore_for_file: non_constant_identifier_names
+// ignore_for_file: unused_element
 
 // AUTO GENERATED FILE, DO NOT EDIT.
 //
@@ -27,15 +28,6 @@ final class SuperuserPluginUnixBindings {
           lookup)
       : _lookup = lookup;
 
-  /// Determine user who execute this program is root.
-  bool is_root() {
-    return _is_root();
-  }
-
-  late final _is_rootPtr =
-      _lookup<ffi.NativeFunction<ffi.Bool Function()>>('is_root');
-  late final _is_root = _is_rootPtr.asFunction<bool Function()>();
-
   /// Obtain name of user.
   int get_uname(
     ffi.Pointer<ffi.Pointer<ffi.Char>> result,
@@ -47,7 +39,92 @@ final class SuperuserPluginUnixBindings {
 
   late final _get_unamePtr = _lookup<
       ffi.NativeFunction<
-          ffi.Int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('get_uname');
+          ERRCODE Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('get_uname');
   late final _get_uname = _get_unamePtr
       .asFunction<int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
+
+  /// Obtain all associated group for current user.
+  int get_current_user_group(
+    ffi.Pointer<ffi.Int> size,
+    ffi.Pointer<ffi.Pointer<gid_t>> groups,
+  ) {
+    return _get_current_user_group(
+      size,
+      groups,
+    );
+  }
+
+  late final _get_current_user_groupPtr = _lookup<
+      ffi.NativeFunction<
+          ERRCODE Function(ffi.Pointer<ffi.Int>,
+              ffi.Pointer<ffi.Pointer<gid_t>>)>>('get_current_user_group');
+  late final _get_current_user_group = _get_current_user_groupPtr.asFunction<
+      int Function(ffi.Pointer<ffi.Int>, ffi.Pointer<ffi.Pointer<gid_t>>)>();
+
+  /// Resolve name of group from given ID number.
+  int get_group_name_by_gid(
+    int group_id,
+    ffi.Pointer<ffi.Pointer<ffi.Char>> result,
+  ) {
+    return _get_group_name_by_gid(
+      group_id,
+      result,
+    );
+  }
+
+  late final _get_group_name_by_gidPtr = _lookup<
+      ffi.NativeFunction<
+          ERRCODE Function(gid_t,
+              ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('get_group_name_by_gid');
+  late final _get_group_name_by_gid = _get_group_name_by_gidPtr
+      .asFunction<int Function(int, ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
+
+  /// Determine user who execute this program is root.
+  bool is_root() {
+    return _is_root();
+  }
+
+  late final _is_rootPtr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function()>>('is_root');
+  late final _is_root = _is_rootPtr.asFunction<bool Function()>();
+
+  /// Determine user is a group member, which eligable to execute program as root by calling
+  /// sudo command.
+  ///
+  /// This method requires sudo bundled in OS already. Normally, majority of UNIX or liked
+  /// system.
+  int is_sudo_group(
+    ffi.Pointer<ffi.Bool> result,
+  ) {
+    return _is_sudo_group(
+      result,
+    );
+  }
+
+  late final _is_sudo_groupPtr =
+      _lookup<ffi.NativeFunction<ERRCODE Function(ffi.Pointer<ffi.Bool>)>>(
+          'is_sudo_group');
+  late final _is_sudo_group =
+      _is_sudo_groupPtr.asFunction<int Function(ffi.Pointer<ffi.Bool>)>();
+
+  /// Flush dynamic allocated pointers.
+  void flush(
+    ffi.Pointer<ffi.Void> ptr,
+  ) {
+    return _flush(
+      ptr,
+    );
+  }
+
+  late final _flushPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+          'flush');
+  late final _flush =
+      _flushPtr.asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 }
+
+typedef ERRCODE = ffi.UnsignedInt;
+typedef DartERRCODE = int;
+typedef gid_t = __gid_t;
+typedef __gid_t = ffi.UnsignedInt;
+typedef Dart__gid_t = int;

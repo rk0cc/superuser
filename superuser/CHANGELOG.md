@@ -1,3 +1,16 @@
+## 2.0.0
+
+* Add user's joined group in local machine scope.
+
+## 2.0.0-m.1
+
+* `isSuperuser` can returns true without superuser permission activated.
+    * Windows: Uses `NetUserGetLocalGroups` to find current user is a member of `Administrators`.
+    * UNIX: Determine user joined default `sudo` command enabled groups (`admin` in macOS, `sudo` in Linux).
+* Expand UNIX's error code to unsigned 32-bits length with two 16-bits segmentes:
+    * Lower 16-bits reuses origin error numbers from libraries.
+    * Upper 16-bits denotes error categories that causing error thrown.
+
 ## 1.0.2
 
 * Add assertion to prevent using mock interface in release mode.

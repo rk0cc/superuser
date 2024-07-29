@@ -4,19 +4,11 @@ UNIX's C API implementation of detecting superuser.
 
 ## Conditions
 
-<table>
-  <tr>
-    <th><p align="center">Property name in <code>SuperuserInterface</code></p></th>
-    <th><p align="center">Conditions of returning <code>true</code></p></th>
-  </tr>
-  <tr>
-    <td><p align="center"><code>isSuperuser</code></p></td>
-    <td rowspan="2">Run the program using `root` identity (e.g. call with <code>sudo</code>)</td>
-  </tr>
-  <tr>
-    <td><p align="center"><code>isActivated</code></p></td>
-  </tr>
-</table>
+|Property name in `SuperuserInterface`|<p align="center">Conditions of returning `true`</p>|
+|:---:|:---|
+|`isSuperuser`|A program is executed by a user who is `root` or a group member that can call `sudo` command|
+|`isActivated`|A program is executed under `root` identity|
+
 
 ### License
 

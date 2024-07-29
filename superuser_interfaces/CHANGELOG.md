@@ -1,3 +1,7 @@
+## 2.1.0
+
+* Add user groups getter.
+
 ## 2.0.0
 
 * Mark `SuperuserInterface` final
