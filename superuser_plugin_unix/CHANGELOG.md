@@ -1,3 +1,7 @@
+## 2.0.0+1
+
+* Update podspec information.
+
 ## 2.0.0
 
 * Implement current user associated groups.

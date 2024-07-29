@@ -4,14 +4,14 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'superuser_plugin_unix'
-  s.version          = '0.0.1'
+  s.version          = '2.0.0'
   s.summary          = 'Detect, verify user who execute Flutter program has superuser role in UNIX'
   s.description      = <<-DESC
 Detect, verify user who execute Flutter program has superuser role in UNIX
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://osp.rk0cc.xyz'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'Your Company' => 'enquiry@rk0cc.xyz' }
 
   # This will ensure the source files in Classes/ are included in the native
   # builds of apps using this FFI plugin. Podspec does not support relative
