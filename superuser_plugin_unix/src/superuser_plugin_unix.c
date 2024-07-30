@@ -22,7 +22,8 @@ typedef enum _error_causes
     pwuid_err = 1,
     grnam_err,
     grouplist_err,
-    grgid_err
+    grgid_err,
+    qso_bse_err
 } error_causes;
 
 static ERRCODE __build_suunix_error_code(error_causes causes, int error_code)
@@ -140,8 +141,11 @@ FFI_PLUGIN_EXPORT ERRCODE is_sudo_group(bool *result)
     if (gp_list_err > 0)
         return gp_list_err;
 
+    errno = 0;
     qsort(gp_lists, ngps, sizeof(gid_t), __sort_search_gid_compare);
     gid_t *found = (gid_t *)bsearch(&sudo_gpid, gp_lists, ngps, sizeof(gid_t), __sort_search_gid_compare);
+    if (errno > 0)
+        return __build_suunix_error_code(qso_bse_err, errno);
 
     *result = found != NULL;
 
