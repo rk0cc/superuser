@@ -1,3 +1,7 @@
+## 2.0.1
+
+* Uses binary search to find admin group.
+
 ## 2.0.0
 
 * Implement listing joined group for current user.
