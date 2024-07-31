@@ -1,6 +1,6 @@
 ## 2.0.1
 
-(Pending release)
+* Fix compare group id overflow issue.
 
 ## 2.0.0+1
 

@@ -51,7 +51,9 @@ void __get_pw_groups(struct passwd *pw, int *length, gid_t **groups)
 
 int __sort_search_gid_compare(const void *a, const void *b)
 {
-    return (*(gid_t *)a - *(gid_t *)b);
+    gid_t aVal = *(gid_t *)a, bVal = *(gid_t *)b;
+    
+    return (aVal > bVal) - (aVal < bVal);
 }
 
 // Obtain name of user.
