@@ -1,7 +1,3 @@
-#
-# To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
-# Run `pod lib lint superuser_plugin_unix.podspec` to validate before publishing.
-#
 Pod::Spec.new do |s|
   s.name             = 'superuser_plugin_unix'
   s.version          = '2.0.1'
@@ -12,6 +8,8 @@ Detect, verify user who execute Flutter program has superuser role in UNIX
   s.homepage         = 'https://osp.rk0cc.xyz'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'enquiry@rk0cc.xyz' }
+
+  # It is preferred to do not alter entities below without using XCode.
 
   # This will ensure the source files in Classes/ are included in the native
   # builds of apps using this FFI plugin. Podspec does not support relative
