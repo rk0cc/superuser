@@ -1,6 +1,6 @@
 ## 2.0.1
 
-* Add error code category for sorting and searching functions.
+(Pending release)
 
 ## 2.0.0+1
 
