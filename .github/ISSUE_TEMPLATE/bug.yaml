@@ -1,0 +1,42 @@
+name: Bug report
+description: Create report when superuser does not worked properly.
+labels:
+  - bug
+body:
+  - type: dropdown
+    attributes:
+      label: Operating system
+      multiple: false
+      options:
+        - Windows
+        - UNIX (include macOS and Linux based system)
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Plugin version
+      description: Version of `superuser_plugin_(os name)`, please run `flutter pub deps` to obtain version of installed plugin.
+      placeholder: 2.0.0
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: External plugin source
+      description: Please tick if this package is not download from hosted repository.
+      options:
+        - label: Git source
+          required: false
+        - label: External host
+          required: false
+  - type: textarea
+    attributes:
+      label: Steps
+      description: Briefly describe how bugs occured
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Stack trace
+      description: Copy and paste the latest stack trace that causing bugs occured.
+      render: plain text
+  
