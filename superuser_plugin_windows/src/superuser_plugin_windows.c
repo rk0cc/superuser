@@ -58,10 +58,13 @@ FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool *result)
 
     errno = 0;
     qsort_s(lg, entries, sizeof(LOCALGROUP_USERS_INFO_0), __sort_search_lguser, NULL);
-    LOCALGROUP_USERS_INFO_0 *found = (LOCALGROUP_USERS_INFO_0 *)bsearch_s(&key, lg, entries, sizeof(LOCALGROUP_USERS_INFO_0), __sort_search_lguser, NULL);
+    if (errno == EINVAL)
+        return ERROR_INVALID_PARAMETER;
 
-    if (errno > 0)
-        return errno;
+    errno = 0;
+    LOCALGROUP_USERS_INFO_0 *found = (LOCALGROUP_USERS_INFO_0 *)bsearch_s(&key, lg, entries, sizeof(LOCALGROUP_USERS_INFO_0), __sort_search_lguser, NULL);
+    if (errno == EINVAL)
+        return ERROR_INVALID_PARAMETER;
 
     bool tmp_result = found != NULL;
     *result = tmp_result;

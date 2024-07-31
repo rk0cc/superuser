@@ -1,6 +1,7 @@
 ## 2.0.1
 
 * Uses binary search to find admin group.
+    * It will throws `ERROR_INVALID_PARAMETER` when this operation failed.
 
 ## 2.0.0
 
