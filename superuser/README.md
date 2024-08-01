@@ -4,7 +4,7 @@ Superuser is a special user, who granted as much as possible to access system fi
 
 Although `pub.dev` has numerous of packages to detect superuser, they are designed for Android and some packages added iOS support already. Hence, these package may become bulky because of unnessary callbacks along with detection.
 
-Instead, `superuser` package offers superuser detection in Flutter desktop as well as return username who opened an application.
+Instead, `superuser` package offers superuser detection in Flutter desktop and two replicated identification command from UNIX (`whoami` and `group`).
 
 ## Implementations
 
