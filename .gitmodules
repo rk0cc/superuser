@@ -1,0 +1,3 @@
+[submodule "superuser/example"]
+	path = superuser/example
+	url = https://github.com/rk0cc/superuser_demo.git
