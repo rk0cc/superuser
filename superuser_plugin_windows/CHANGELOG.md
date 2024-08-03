@@ -1,3 +1,7 @@
+## 2.0.2
+
+* Fix memory not fully released when exception thrown during iterations.
+
 ## 2.0.1
 
 * Uses binary search to find admin group.

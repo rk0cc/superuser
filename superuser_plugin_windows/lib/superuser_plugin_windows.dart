@@ -92,23 +92,13 @@ final class WindowsSuperuser extends SuperuserPlatform {
       });
 
   @override
-  Iterable<String> get groups => onGettingProperties((lib) {
+  Iterable<String> get groups => onGettingProperties((lib) sync* {
         final SuperuserPluginWindowsBindings binding =
             SuperuserPluginWindowsBindings(lib);
 
         Pointer<Pointer<Pointer<Char>>> gps =
             ffi.calloc<Pointer<Pointer<Char>>>();
         Pointer<DWORD> size = ffi.calloc<DWORD>();
-
-        Iterable<Pointer<Char>> iteratedGps() sync* {
-          Pointer<Pointer<Char>> gpArrPtr = gps.value;
-
-          for (int i = 0; i < size.value; i++) {
-            yield gpArrPtr[i];
-          }
-
-          binding.flush(gpArrPtr.cast<Void>());
-        }
 
         try {
           int errCode = binding.get_associated_groups(gps, size);
@@ -118,15 +108,26 @@ final class WindowsSuperuser extends SuperuserPlatform {
                 errCode, "Unable to extract group information.");
           }
 
-          return iteratedGps().map((ptr) {
-            try {
-              Pointer<ffi.Utf8> utfStr = ptr.cast<ffi.Utf8>();
+          Pointer<Pointer<Char>> gpArrPtr = gps.value;
+          List<Pointer<Char>> gpsQueue = [];
 
-              return utfStr.toDartString();
-            } finally {
-              binding.flush(ptr.cast<Void>());
+          try {
+            for (int i = 0; i < size.value; i++) {
+              gpsQueue.add(gpArrPtr[i]);
             }
-          });
+          } finally {
+            binding.flush(gpArrPtr.cast<Void>());
+          }
+
+          try {
+            for (Pointer<Char> gp in gpsQueue) {
+              yield gp.cast<ffi.Utf8>().toDartString();
+            }
+          } finally {
+            for (Pointer<Char> gp in gpsQueue) {
+              binding.flush(gp.cast<Void>());
+            }
+          }
         } finally {
           <Pointer>[gps, size].forEach(ffi.calloc.free);
         }
