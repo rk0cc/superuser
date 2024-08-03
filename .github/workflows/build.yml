@@ -22,7 +22,7 @@ jobs:
           channel: stable
           flutter-version: 3.x
       - name: Get dependencies
-        run: flutter pub get
+        run: flutter pub upgrade
         working-directory: ./superuser
       - name: Build example
         run: flutter build windows --release
