@@ -51,7 +51,12 @@ FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool *result)
 
     ERRCODE err = __obtain_user_local_group(&buf, &entries, &total);
     if (err)
+    {
+        if (buf)
+            NetApiBufferFree(buf);
+
         return err;
+    }
 
     LOCALGROUP_USERS_INFO_0 key = {.lgrui0_name = L"Administrators"};
     LOCALGROUP_USERS_INFO_0 *lg = (LOCALGROUP_USERS_INFO_0 *)buf;
@@ -59,12 +64,20 @@ FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool *result)
     errno = 0;
     qsort_s(lg, entries, sizeof(LOCALGROUP_USERS_INFO_0), __sort_search_lguser, NULL);
     if (errno == EINVAL)
+    {
+        NetApiBufferFree(buf);
+
         return ERROR_INVALID_PARAMETER;
+    }
 
     errno = 0;
     LOCALGROUP_USERS_INFO_0 *found = (LOCALGROUP_USERS_INFO_0 *)bsearch_s(&key, lg, entries, sizeof(LOCALGROUP_USERS_INFO_0), __sort_search_lguser, NULL);
     if (errno == EINVAL)
+    {
+        NetApiBufferFree(buf);
+
         return ERROR_INVALID_PARAMETER;
+    }
 
     bool tmp_result = found != NULL;
     *result = tmp_result;
@@ -81,21 +94,29 @@ FFI_PLUGIN_EXPORT ERRCODE is_elevated(bool *result)
 
     SetLastError(0);
     if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token))
+    {
+        if (token)
+            CloseHandle(token);
+        
         return GetLastError();
+    }
 
     TOKEN_ELEVATION elevation;
     DWORD cbSize = sizeof(TOKEN_ELEVATION);
 
     SetLastError(0);
     if (!GetTokenInformation(token, TokenElevation, &elevation, sizeof elevation, &cbSize))
+    {
+        CloseHandle(token);
+
         return GetLastError();
+    }
 
     bool tmp_result = elevation.TokenIsElevated ? true : false;
 
     *result = tmp_result;
 
-    if (token)
-        CloseHandle(token);
+    CloseHandle(token);
 
     return 0;
 }
@@ -125,7 +146,12 @@ FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(char ***groups, DWORD *length)
 
     ERRCODE err = __obtain_user_local_group(&buf, &entries, &total);
     if (err)
+    {
+        if (buf)
+            NetApiBufferFree(buf);
+
         return err;
+    }
 
     char **tmp_groups = (char **)calloc(entries, sizeof(char *));
 
@@ -133,7 +159,11 @@ FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(char ***groups, DWORD *length)
     for (DWORD i = 0; i < entries; i++)
     {
         if (!__wchar_to_utf8(lg[i].lgrui0_name, &tmp_groups[i]))
+        {
+            NetApiBufferFree(buf);
+
             return GetLastError();
+        }
     }
 
     NetApiBufferFree(buf);

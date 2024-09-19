@@ -1,3 +1,7 @@
+## 2.0.3
+
+* Fix internal uses dynamic memory allocation not released when error occured.
+
 ## 2.0.2
 
 * Fix memory not fully released when exception thrown during iterations.
