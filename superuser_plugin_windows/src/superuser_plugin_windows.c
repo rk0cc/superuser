@@ -4,7 +4,7 @@
 
 #include "superuser_plugin_windows.h"
 
-#define MAX_USERNAME_CHAR 256
+#define MAX_USERNAME_CHAR 257
 
 BOOL __wchar_to_utf8(WCHAR *wc, char **utf)
 {
