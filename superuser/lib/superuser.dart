@@ -4,6 +4,9 @@
 /// as well as username who run current Flutter program.
 library superuser;
 
+import 'dart:collection';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:superuser_interfaces/superuser_interfaces.dart'
     show MockSuperuser;
@@ -55,5 +58,24 @@ abstract final class Superuser {
   static String get whoAmI => instance.whoAmI;
 
   /// Obtain user's associated groups in local system.
-  static Set<String> get groups => Set.unmodifiable(instance.groups);
+  static Set<String> get groups =>
+      UnmodifiableSetView(LinkedHashSet(equals: (a, b) {
+        String cmpA = a, cmpB = b;
+
+        if (Platform.isWindows) {
+          cmpA = cmpA.toUpperCase();
+          cmpB = cmpB.toUpperCase();
+        }
+
+        return cmpA == cmpB;
+      }, hashCode: (str) {
+        String hashStr = str;
+
+        if (Platform.isWindows) {
+          hashStr = hashStr.toUpperCase();
+        }
+
+        return hashStr.hashCode;
+      })
+        ..addAll(instance.groups));
 }

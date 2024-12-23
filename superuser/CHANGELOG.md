@@ -1,3 +1,7 @@
+## 2.1.1
+
+* Case sensitivity in group set is depends on Operating System now (only Windows is case insensitive).
+
 ## 2.1.0
 
 * Change Dart SDK to `^3.6.0` for monorepo support.
