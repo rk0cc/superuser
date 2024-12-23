@@ -118,15 +118,15 @@ FFI_PLUGIN_EXPORT ERRCODE get_current_username(char **result)
         return GetLastError();
 
     SetLastError(0);
-    char **tmp_result;
+    char *tmp_result;
 
-    if (!__wchar_to_utf8(buffer, tmp_result))
+    if (!__wchar_to_utf8(buffer, &tmp_result))
     {
         free(tmp_result);
         return GetLastError();
     }
 
-    result = tmp_result;
+    *result = tmp_result;
     return 0;
 }
 
