@@ -1,3 +1,9 @@
+## 2.1.0
+
+* Change Dart SDK constraint to `^3.6.0` for applying monorepo support.
+* Rewrite C APIs that the functions will flush allocated memory automatically when error occurred.
+* Remove unused `plugin_platform_interface` dependencies.
+
 ## 2.0.3
 
 * Fix internal uses dynamic memory allocation not released when error occured.

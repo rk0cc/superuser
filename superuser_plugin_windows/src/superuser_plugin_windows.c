@@ -5,6 +5,7 @@
 #include "superuser_plugin_windows.h"
 
 #define MAX_USERNAME_CHAR 257
+#define WIN_ADMIN_PARAM L"Administrators"
 
 BOOL __wchar_to_utf8(WCHAR *wc, char **utf)
 {
@@ -33,7 +34,7 @@ ERRCODE __obtain_user_local_group(LPBYTE *gp, DWORD *entries, DWORD *total)
     return 0;
 }
 
-int __sort_search_lguser(void *context, const void *a, const void *b)
+int __sort_search_lguser(const void *a, const void *b)
 {
     LPCWCHAR aChar, bChar;
 
@@ -58,26 +59,11 @@ FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool *result)
         return err;
     }
 
-    LOCALGROUP_USERS_INFO_0 key = {.lgrui0_name = L"Administrators"};
+    LOCALGROUP_USERS_INFO_0 key = {.lgrui0_name = WIN_ADMIN_PARAM};
     LOCALGROUP_USERS_INFO_0 *lg = (LOCALGROUP_USERS_INFO_0 *)buf;
 
-    errno = 0;
-    qsort_s(lg, entries, sizeof(LOCALGROUP_USERS_INFO_0), __sort_search_lguser, NULL);
-    if (errno == EINVAL)
-    {
-        NetApiBufferFree(buf);
-
-        return ERROR_INVALID_PARAMETER;
-    }
-
-    errno = 0;
-    LOCALGROUP_USERS_INFO_0 *found = (LOCALGROUP_USERS_INFO_0 *)bsearch_s(&key, lg, entries, sizeof(LOCALGROUP_USERS_INFO_0), __sort_search_lguser, NULL);
-    if (errno == EINVAL)
-    {
-        NetApiBufferFree(buf);
-
-        return ERROR_INVALID_PARAMETER;
-    }
+    qsort(lg, entries, sizeof(LOCALGROUP_USERS_INFO_0), __sort_search_lguser);
+    LOCALGROUP_USERS_INFO_0 *found = (LOCALGROUP_USERS_INFO_0 *)bsearch(&key, lg, entries, sizeof(LOCALGROUP_USERS_INFO_0), __sort_search_lguser);
 
     bool tmp_result = found != NULL;
     *result = tmp_result;
@@ -97,7 +83,7 @@ FFI_PLUGIN_EXPORT ERRCODE is_elevated(bool *result)
     {
         if (token)
             CloseHandle(token);
-        
+
         return GetLastError();
     }
 
@@ -132,9 +118,15 @@ FFI_PLUGIN_EXPORT ERRCODE get_current_username(char **result)
         return GetLastError();
 
     SetLastError(0);
-    if (!__wchar_to_utf8(buffer, result))
-        return GetLastError();
+    char **tmp_result;
 
+    if (!__wchar_to_utf8(buffer, tmp_result))
+    {
+        free(tmp_result);
+        return GetLastError();
+    }
+
+    result = tmp_result;
     return 0;
 }
 
@@ -162,6 +154,11 @@ FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(char ***groups, DWORD *length)
         {
             NetApiBufferFree(buf);
 
+            for (DWORD j = i; j >= 0; j--)
+                free(tmp_groups[j]);
+
+            free(tmp_groups);
+
             return GetLastError();
         }
     }
@@ -174,8 +171,17 @@ FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(char ***groups, DWORD *length)
     return 0;
 }
 
-// Flush dynamic allocated function.
-FFI_PLUGIN_EXPORT void flush(void *ptr)
+// Free allocated memory of string.
+FFI_PLUGIN_EXPORT void flush_cstr(char *str)
 {
-    free(ptr);
+    free(str);
+}
+
+// Wipe all data in 2D allocated memory of string.
+FFI_PLUGIN_EXPORT void flush_cstr_array(char **str_array, DWORD length)
+{
+    for (DWORD i = 0; i < length; i++)
+        flush_cstr(str_array[i]);
+
+    free(str_array);
 }

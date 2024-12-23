@@ -1,3 +1,7 @@
+## 2.1.0
+
+* Change Dart SDK to `^3.6.0` for monorepo support.
+
 ## 2.0.0
 
 * Add user's joined group in local machine scope.

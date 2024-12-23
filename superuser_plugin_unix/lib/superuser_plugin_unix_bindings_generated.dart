@@ -108,23 +108,23 @@ final class SuperuserPluginUnixBindings {
       _is_sudo_groupPtr.asFunction<int Function(ffi.Pointer<ffi.Bool>)>();
 
   /// Flush dynamic allocated pointers.
-  void flush(
-    ffi.Pointer<ffi.Void> ptr,
+  void flush_group(
+    ffi.Pointer<gid_t> groups,
   ) {
-    return _flush(
-      ptr,
+    return _flush_group(
+      groups,
     );
   }
 
-  late final _flushPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-          'flush');
-  late final _flush =
-      _flushPtr.asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+  late final _flush_groupPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<gid_t>)>>(
+          'flush_group');
+  late final _flush_group =
+      _flush_groupPtr.asFunction<void Function(ffi.Pointer<gid_t>)>();
 }
 
 typedef ERRCODE = ffi.UnsignedInt;
 typedef DartERRCODE = int;
-typedef gid_t = __gid_t;
 typedef __gid_t = ffi.UnsignedInt;
 typedef Dart__gid_t = int;
+typedef gid_t = __gid_t;

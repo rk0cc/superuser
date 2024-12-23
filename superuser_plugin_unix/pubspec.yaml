@@ -10,8 +10,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  plugin_platform_interface: ^2.1.8
-  ffi: ^2.1.2
+  ffi: ^2.1.3
   superuser_interfaces: ^2.1.0
 dev_dependencies:
   ffigen: ^16.0.0

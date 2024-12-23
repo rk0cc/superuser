@@ -44,7 +44,7 @@ void __get_pw_groups(struct passwd *pw, int *length, gid_t **groups)
     gid_t *tmp_groups = (gid_t *)calloc(max_ngps, sizeof(gid_t));
 
     ngps = getgroups(max_ngps, tmp_groups);
-    
+
     *length = ngps;
     *groups = tmp_groups;
 }
@@ -52,7 +52,7 @@ void __get_pw_groups(struct passwd *pw, int *length, gid_t **groups)
 int __sort_search_gid_compare(const void *a, const void *b)
 {
     gid_t aVal = *(gid_t *)a, bVal = *(gid_t *)b;
-    
+
     return (aVal > bVal) - (aVal < bVal);
 }
 
@@ -102,7 +102,7 @@ FFI_PLUGIN_EXPORT ERRCODE get_current_user_group(int *size, gid_t **groups)
 FFI_PLUGIN_EXPORT ERRCODE get_group_name_by_gid(gid_t group_id, char **result)
 {
     errno = 0;
-    struct group* gp = getgrgid(group_id);
+    struct group *gp = getgrgid(group_id);
     if (!gp)
         return __build_suunix_error_code(grgid_err, errno);
 

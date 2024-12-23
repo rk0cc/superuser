@@ -84,7 +84,7 @@ final class WindowsSuperuser extends SuperuserPlatform {
 
             return ctx.toDartString();
           } finally {
-            binding.flush(result.cast<Void>());
+            binding.flush_cstr(result);
           }
         } finally {
           ffi.calloc.free(resultPtr);
@@ -109,24 +109,12 @@ final class WindowsSuperuser extends SuperuserPlatform {
           }
 
           Pointer<Pointer<Char>> gpArrPtr = gps.value;
-          List<Pointer<Char>> gpsQueue = [];
-
           try {
             for (int i = 0; i < size.value; i++) {
-              gpsQueue.add(gpArrPtr[i]);
+              yield gpArrPtr[i].cast<ffi.Utf8>().toDartString();
             }
           } finally {
-            binding.flush(gpArrPtr.cast<Void>());
-          }
-
-          try {
-            for (Pointer<Char> gp in gpsQueue) {
-              yield gp.cast<ffi.Utf8>().toDartString();
-            }
-          } finally {
-            for (Pointer<Char> gp in gpsQueue) {
-              binding.flush(gp.cast<Void>());
-            }
+            binding.flush_cstr_array(gpArrPtr, size.value);
           }
         } finally {
           <Pointer>[gps, size].forEach(ffi.calloc.free);

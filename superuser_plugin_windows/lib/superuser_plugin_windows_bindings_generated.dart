@@ -92,24 +92,43 @@ final class SuperuserPluginWindowsBindings {
       int Function(ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>>,
           ffi.Pointer<DWORD>)>();
 
-  /// Flush dynamic allocated function.
-  void flush(
-    ffi.Pointer<ffi.Void> ptr,
+  /// Free allocated memory of string.
+  void flush_cstr(
+    ffi.Pointer<ffi.Char> str,
   ) {
-    return _flush(
-      ptr,
+    return _flush_cstr(
+      str,
     );
   }
 
-  late final _flushPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-          'flush');
-  late final _flush =
-      _flushPtr.asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+  late final _flush_cstrPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Char>)>>(
+          'flush_cstr');
+  late final _flush_cstr =
+      _flush_cstrPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
+
+  /// Wipe all data in 2D allocated memory of string.
+  void flush_cstr_array(
+    ffi.Pointer<ffi.Pointer<ffi.Char>> str_array,
+    int length,
+  ) {
+    return _flush_cstr_array(
+      str_array,
+      length,
+    );
+  }
+
+  late final _flush_cstr_arrayPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Pointer<ffi.Pointer<ffi.Char>>, DWORD)>>('flush_cstr_array');
+  late final _flush_cstr_array = _flush_cstr_arrayPtr
+      .asFunction<void Function(ffi.Pointer<ffi.Pointer<ffi.Char>>, int)>();
 }
+
+typedef DWORD = ffi.UnsignedLong;
+typedef DartDWORD = int;
 
 /// Returned value indicates the process result, which
 /// uses non-zero values to denotes problem during processing.
 typedef ERRCODE = DWORD;
-typedef DWORD = ffi.UnsignedLong;
-typedef DartDWORD = int;

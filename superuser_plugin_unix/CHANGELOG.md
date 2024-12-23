@@ -1,3 +1,8 @@
+## 2.1.0
+
+* Change Dart SDK constraint to `^3.6.0` for applying monorepo support.
+* Remove unused `plugin_platform_interface` dependencies.
+
 ## 2.0.1
 
 * Fix compare group id overflow issue.

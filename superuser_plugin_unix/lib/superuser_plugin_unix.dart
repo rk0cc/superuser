@@ -110,7 +110,7 @@ final class UnixSuperuser extends SuperuserPlatform {
             }
           } finally {
             ffi.calloc.free(gpName);
-            bindings.flush(gids.cast<Void>());
+            bindings.flush_group(gids);
           }
         } finally {
           [gps, size].forEach(ffi.calloc.free);

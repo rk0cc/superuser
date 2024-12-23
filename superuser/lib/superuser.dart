@@ -4,7 +4,7 @@
 /// as well as username who run current Flutter program.
 library superuser;
 
-import 'package:flutter/foundation.dart' show kReleaseMode;
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:superuser_interfaces/superuser_interfaces.dart'
     show MockSuperuser;
 
@@ -21,8 +21,8 @@ export 'src/exception.dart';
 /// By default, [Superuser] will load instance for specific platform automatically.
 /// If mock data is required, please attach [MockSuperuser] into [SuperuserInstance.bindInstance]
 /// before calling any getters in [Superuser]. However, attaching mock instance
-/// should not be done in [kReleaseMode], which causes [IllegalInstanceError]
-/// throw.
+/// must be done only in [kDebugMode] or causing [IllegalInstanceError]
+/// throw otherwise.
 abstract final class Superuser {
   const Superuser._();
 
