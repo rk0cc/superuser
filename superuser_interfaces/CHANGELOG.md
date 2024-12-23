@@ -1,3 +1,7 @@
+## 2.2.0
+
+* Change Dart SDK constraint to `^3.6.0` for applying monorepo support.
+
 ## 2.1.0
 
 * Add user groups getter.
