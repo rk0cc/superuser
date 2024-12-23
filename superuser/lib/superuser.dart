@@ -55,5 +55,5 @@ abstract final class Superuser {
   static String get whoAmI => instance.whoAmI;
 
   /// Obtain user's associated groups in local system.
-  static Iterable<String> get groups => instance.groups;
+  static Set<String> get groups => Set.unmodifiable(instance.groups);
 }

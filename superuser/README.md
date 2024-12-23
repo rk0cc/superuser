@@ -2,9 +2,14 @@
 
 Superuser is a special user, who granted as much as possible to access system files for maintenance purpose. Different systems has different names to refer superuser (e.g. `root` in various UNIX system and `Administrator` in Windows). 
 
-Although `pub.dev` has numerous of packages to detect superuser, they are designed for Android and some packages added iOS support already. Hence, these package may become bulky because of unnessary callbacks along with detection.
+Although `pub.dev` has numerous of packages to detect superuser, they are designed for Android and some packages added iOS support already. Hence, these package may become bulky because of unnessary callbacks along with detection only.
 
-Instead, `superuser` package offers superuser detection in Flutter desktop and two replicated identification command from UNIX (`whoami` and `group`).
+Instead, `superuser` package offers superuser detection in Flutter desktop and two replicated identification command from UNIX (`whoami` and `group`) for additional verification if necessary.
+
+## Limitations
+
+This package only tested using informations given on **local machines** only. It may not perform identically if running devices
+is domain joined.
 
 ## Implementations
 

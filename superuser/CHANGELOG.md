@@ -1,6 +1,7 @@
 ## 2.1.0
 
 * Change Dart SDK to `^3.6.0` for monorepo support.
+* `Superuser.groups` returns `Set` rather than `Iterable`.
 
 ## 2.0.0
 
