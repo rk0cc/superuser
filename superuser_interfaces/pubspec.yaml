@@ -2,13 +2,14 @@ name: superuser_interfaces
 description: Interface defination for verifying user executes Flutter program with superuser role.
 homepage: https://github.com/rk0cc/superuser
 repository: https://github.com/rk0cc/superuser/tree/main/superuser_interfaces
-version: 2.1.0
+version: 2.2.0
 environment: 
-  sdk: '>=3.4.0 <4.0.0'
+  sdk: ^3.6.0
+resolution: workspace
 dependencies: 
-  meta: ^1.12.0
+  meta: ^1.15.0
 dev_dependencies:
-  lints: ^4.0.0
+  lints: ^5.0.0
 platforms:
   linux:
   macos:

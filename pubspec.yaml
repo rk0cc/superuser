@@ -1,0 +1,9 @@
+name: _
+publish_to: none
+environment: 
+  sdk: ^3.6.0
+workspace:
+  - superuser/
+  - superuser_interfaces/
+  - superuser_plugin_unix/
+  - superuser_plugin_windows/

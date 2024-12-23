@@ -1,11 +1,12 @@
 name: superuser_plugin_unix
 description: "Detect, verify user who execute Flutter program has superuser role in UNIX"
-version: 2.0.1
+version: 2.1.0
 homepage: https://github.com/rk0cc/superuser
 repository: https://github.com/rk0cc/superuser/tree/main/superuser_plugin_unix
 environment:
-  sdk: '>=3.4.0 <4.0.0'
-  flutter: '>=3.22.0'
+  sdk: ^3.6.0
+  flutter: '>=3.27.0'
+resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
@@ -13,8 +14,8 @@ dependencies:
   ffi: ^2.1.2
   superuser_interfaces: ^2.1.0
 dev_dependencies:
-  ffigen: ^12.0.0
-  flutter_lints: ^4.0.0
+  ffigen: ^16.0.0
+  flutter_lints: ^5.0.0
 flutter:
   plugin:
     platforms:
