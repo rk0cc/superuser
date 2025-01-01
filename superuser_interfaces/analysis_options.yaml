@@ -2,3 +2,6 @@ include: package:lints/recommended.yaml
 linter:
   rules:
    unnecessary_library_name: false
+analyzer:
+  errors:
+    use_super_parameters: ignore
