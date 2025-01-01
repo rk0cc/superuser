@@ -82,10 +82,7 @@ final class UnixName extends OSName<UnixName> {
 
 /// A general interface to extract information of identity from
 /// operating system.
-abstract interface class OSIdentifier<T> {
-  /// A unique value uses for representing this interface.
-  T get id;
-
+abstract interface class OSIdentifier {
   /// Name of [OSIdentifier] with comparison method applied in
   /// operating system.
   OSName get name;
