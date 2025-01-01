@@ -1,87 +1,92 @@
-import 'dart:io';
-
 import 'package:meta/meta.dart';
 
-/// A [String] with matched case sensitivity for comparison regarding
-/// which operating system is used.
+/// A name applies with different [compareTo] condition based on operating
+/// system preference.
 /// 
-/// The alternation of [String] value would be made only when using 
-/// [compareTo], [hashCode] and [==] internally. And [toString] will
-/// returns the value when applied.
-sealed class IdentifierName implements Comparable<IdentifierName> {
+/// This class serves as [String] wrapper with customized [Compareable]
+/// implementations that it should only modifies comparison methods or operators
+/// without altering applied value itself. Therefore, the returned value of
+/// [toString] must be identical when it applied in constructor.
+abstract final class OSName<T extends OSName<T>> implements Comparable<T> {
   final String _value;
 
-  const IdentifierName._(String value) : _value = value;
-
-  /// Assign [value] into [IdentifierName] by respecting comparison stragety
-  /// in different operating system.
-  /// 
-  /// It returns [WindowsIdentifierName] if [Platform.isWindows] is `true`,
-  /// which compare [String] without considering cases for each characters.
-  /// Otherwise, [UnixIdentifierName] will be returned instead.
-  factory IdentifierName(String value) => Platform.isWindows
-      ? WindowsIdentifierName(value)
-      : UnixIdentifierName(value);
-
-  @override
-  int compareTo(IdentifierName other);
+  const OSName._(this._value);
 
   @mustBeOverridden
   @override
   int get hashCode;
+  
+  @mustBeOverridden
+  @override
+  bool operator ==(Object other);
 
   @override
   String toString() {
     return _value;
   }
-
-  @mustBeOverridden
-  @override
-  bool operator ==(Object other);
 }
 
-/// An [IdentifierName] with comparsion rule applied in Windows.
+/// An [OSName] without considering case sensivity of given value.
 /// 
-/// The comparison result will be based on [String.toUpperCase]
-/// between itself and other [IdentifierName] value.
-final class WindowsIdentifierName extends IdentifierName {
-  const WindowsIdentifierName(super.value) : super._();
+/// It refers [String.toUpperCase] to compare differences.
+final class WindowsName extends OSName<WindowsName> {
+  /// Assign given [value] and using [String.toUpperCase] as
+  /// to compare with other [WindowsName].
+  const WindowsName(String value) : super._(value);
 
-  @override
-  int compareTo(IdentifierName other) {
-    return _value.toUpperCase().compareTo(other._value.toUpperCase());
-  }
-
-  @override
-  int get hashCode => _value.toUpperCase().hashCode;
+  String get _compareValue => _value.toUpperCase();
 
   @override
   bool operator ==(Object other) {
-    if (other is IdentifierName) {
-      return _value.toUpperCase() == other._value.toUpperCase();
+    if (other is WindowsName) {
+      return _compareValue == other._compareValue;
     }
 
     return false;
   }
-}
-
-final class UnixIdentifierName extends IdentifierName {
-  const UnixIdentifierName(super.value) : super._();
 
   @override
-  int compareTo(IdentifierName other) {
-    return _value.compareTo(other._value);
+  int compareTo(WindowsName other) {
+    return _compareValue.compareTo(other._compareValue);
   }
 
   @override
-  int get hashCode => _value.hashCode;
+  int get hashCode => _compareValue.hashCode;
+}
+
+/// An [OSName] with considering case sensivity of value.
+/// 
+/// In other words, it takes assigned value to compare without
+/// any alternation.
+final class UnixName extends OSName<UnixName> {
+  /// Assign [value] as [OSName] in UNIX system.
+  const UnixName(String value) : super._(value);
 
   @override
   bool operator ==(Object other) {
-    if (other is IdentifierName) {
+    if (other is UnixName) {
       return _value == other._value;
     }
 
     return false;
   }
+
+  @override
+  int compareTo(UnixName other) {
+    return _value.compareTo(other._value);
+  }
+
+  @override
+  int get hashCode => _value.hashCode;
+}
+
+/// A general interface to extract information of identity from
+/// operating system.
+abstract interface class OSIdentifier<T> {
+  /// A unique value uses for representing this interface.
+  T get id;
+
+  /// Name of [OSIdentifier] with comparison method applied in
+  /// operating system.
+  OSName get name;
 }
