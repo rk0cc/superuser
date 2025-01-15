@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'identifier.dart';
+
 /// Detailed information from [SuperuserProcessError] to indicate
 /// the result returns with error in FFI.
 final class ErrorDetail {
