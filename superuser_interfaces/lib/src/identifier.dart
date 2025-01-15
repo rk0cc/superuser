@@ -1,9 +1,13 @@
 import 'dart:collection';
 
-mixin Identifier<I extends Comparable, T extends Identifier<I, T>>
-    implements Comparable<T> {
-  I get id;
-  String get name;
+import 'package:meta/meta.dart';
+
+abstract final class Identifier<I extends Comparable,
+    T extends Identifier<I, T>> implements Comparable<T> {
+  final I id;
+  final String name;
+
+  const Identifier(this.id, this.name);
 
   @override
   int compareTo(T other) {
@@ -19,280 +23,244 @@ mixin Identifier<I extends Comparable, T extends Identifier<I, T>>
 }
 
 abstract base class Group<I extends Comparable, T extends Group<I, T>>
-    with Identifier<I, T> {
-  @override
-  final I id;
+    extends Identifier<I, T> {
+  const Group(super.id, super.name);
 
-  @override
-  final String name;
-
-  const Group(this.id, this.name);
+  
 }
 
-abstract base class GroupSet<E extends Group<Comparable, E>> implements Set<E> {
-  final LinkedHashSet<E> _gpSet;
+abstract base class User<I extends Comparable, T extends User<I, T>>
+    extends Identifier<I, T> {
+  const User(super.id, super.name);
+}
 
-  GroupSet(Iterable<E> groups,
-      {bool Function(E, E)? equals,
-      int Function(E)? hashCode,
-      bool Function(dynamic)? isValidKey})
-      : _gpSet = LinkedHashSet(
-            equals: equals, hashCode: hashCode, isValidKey: isValidKey)
+abstract base class GroupSet<I extends Comparable, E extends Group<I, E>>
+    implements Set<E> {
+  final LinkedHashSet<E> _idSet;
+
+  GroupSet(
+    Iterable<E> groups, {
+    int Function(E)? hashCode,
+  }) : _idSet = LinkedHashSet(
+            equals: (a, b) => a.compareTo(b) == 0 || a.compareToName(b) == 0,
+            hashCode: hashCode)
           ..addAll([...groups]..sort());
 
   @override
   bool add(E value) {
-    // TODO: implement add
-    throw UnimplementedError();
+    throw UnsupportedError("add");
   }
 
   @override
   void addAll(Iterable<E> elements) {
-    // TODO: implement addAll
+    throw UnsupportedError("addAll");
   }
 
   @override
   bool any(bool Function(E element) test) {
-    // TODO: implement any
-    throw UnimplementedError();
+    return _idSet.any(test);
   }
 
   @override
   Set<R> cast<R>() {
-    // TODO: implement cast
-    throw UnimplementedError();
+    return _idSet.cast<R>();
   }
 
   @override
   void clear() {
-    // TODO: implement clear
+    throw UnsupportedError("clear");
   }
 
   @override
   bool contains(Object? value) {
-    // TODO: implement contains
-    throw UnimplementedError();
+    return _idSet.contains(value);
   }
+
+  bool containsId(I id);
+
+  bool containsName(String name);
 
   @override
   bool containsAll(Iterable<Object?> other) {
-    // TODO: implement containsAll
-    throw UnimplementedError();
+    return _idSet.containsAll(other);
   }
 
   @override
   Set<E> difference(Set<Object?> other) {
-    // TODO: implement difference
-    throw UnimplementedError();
+    return _idSet.difference(other);
   }
 
   @override
   E elementAt(int index) {
-    // TODO: implement elementAt
-    throw UnimplementedError();
+    return _idSet.elementAt(index);
   }
 
   @override
   bool every(bool Function(E element) test) {
-    // TODO: implement every
-    throw UnimplementedError();
+    return _idSet.every(test);
   }
 
   @override
   Iterable<T> expand<T>(Iterable<T> Function(E element) toElements) {
-    // TODO: implement expand
-    throw UnimplementedError();
+    return _idSet.expand(toElements);
   }
 
   @override
-  // TODO: implement first
-  E get first => throw UnimplementedError();
+  E get first => _idSet.first;
 
   @override
   E firstWhere(bool Function(E element) test, {E Function()? orElse}) {
-    // TODO: implement firstWhere
-    throw UnimplementedError();
+    return _idSet.firstWhere(test);
   }
 
   @override
   T fold<T>(T initialValue, T Function(T previousValue, E element) combine) {
-    // TODO: implement fold
-    throw UnimplementedError();
+    return _idSet.fold(initialValue, combine);
   }
 
   @override
   Iterable<E> followedBy(Iterable<E> other) {
-    // TODO: implement followedBy
-    throw UnimplementedError();
+    return _idSet.followedBy(other);
   }
 
   @override
   void forEach(void Function(E element) action) {
-    // TODO: implement forEach
+    _idSet.forEach(action);
   }
 
   @override
   Set<E> intersection(Set<Object?> other) {
-    // TODO: implement intersection
-    throw UnimplementedError();
+    return _idSet.intersection(other);
   }
 
   @override
-  // TODO: implement isEmpty
-  bool get isEmpty => throw UnimplementedError();
+  bool get isEmpty => _idSet.isEmpty;
 
   @override
-  // TODO: implement isNotEmpty
-  bool get isNotEmpty => throw UnimplementedError();
+  bool get isNotEmpty => _idSet.isNotEmpty;
 
   @override
-  // TODO: implement iterator
-  Iterator<E> get iterator => throw UnimplementedError();
+  Iterator<E> get iterator => _idSet.iterator;
 
   @override
   String join([String separator = ""]) {
-    // TODO: implement join
-    throw UnimplementedError();
+    return _idSet.join(separator);
   }
 
   @override
-  // TODO: implement last
-  E get last => throw UnimplementedError();
+  E get last => _idSet.last;
 
   @override
   E lastWhere(bool Function(E element) test, {E Function()? orElse}) {
-    // TODO: implement lastWhere
-    throw UnimplementedError();
+    return _idSet.lastWhere(test);
   }
 
   @override
-  // TODO: implement length
-  int get length => throw UnimplementedError();
+  int get length => _idSet.length;
 
   @override
   E? lookup(Object? object) {
-    // TODO: implement lookup
-    throw UnimplementedError();
+    return _idSet.lookup(object);
   }
 
   @override
   Iterable<T> map<T>(T Function(E e) toElement) {
-    // TODO: implement map
-    throw UnimplementedError();
+    return _idSet.map(toElement);
   }
 
   @override
   E reduce(E Function(E value, E element) combine) {
-    // TODO: implement reduce
-    throw UnimplementedError();
+    return _idSet.reduce(combine);
   }
 
   @override
   bool remove(Object? value) {
-    // TODO: implement remove
-    throw UnimplementedError();
+    throw UnsupportedError("remove");
   }
 
   @override
   void removeAll(Iterable<Object?> elements) {
-    // TODO: implement removeAll
+    throw UnsupportedError("removeAll");
   }
 
   @override
   void removeWhere(bool Function(E element) test) {
-    // TODO: implement removeWhere
+    throw UnsupportedError("removeWhere");
   }
 
   @override
   void retainAll(Iterable<Object?> elements) {
-    // TODO: implement retainAll
+    throw UnsupportedError("retainAll");
   }
 
   @override
   void retainWhere(bool Function(E element) test) {
-    // TODO: implement retainWhere
+    throw UnsupportedError("retainWhere");
   }
 
   @override
-  // TODO: implement single
-  E get single => throw UnimplementedError();
+  E get single => _idSet.single;
 
   @override
   E singleWhere(bool Function(E element) test, {E Function()? orElse}) {
-    // TODO: implement singleWhere
-    throw UnimplementedError();
+    return _idSet.singleWhere(test);
   }
 
   @override
   Iterable<E> skip(int count) {
-    // TODO: implement skip
-    throw UnimplementedError();
+    return _idSet.skip(count);
   }
 
   @override
   Iterable<E> skipWhile(bool Function(E value) test) {
-    // TODO: implement skipWhile
-    throw UnimplementedError();
+    return _idSet.skipWhile(test);
   }
 
   void sort([Comparator<E>? compare]) {
-    List<E> sortedGp = [..._gpSet]..sort(compare);
+    List<E> sortedGp = [..._idSet]..sort(compare);
 
-    _gpSet
+    _idSet
       ..clear()
       ..addAll(sortedGp);
   }
 
   @override
   Iterable<E> take(int count) {
-    // TODO: implement take
-    throw UnimplementedError();
+    return _idSet.take(count);
   }
 
   @override
   Iterable<E> takeWhile(bool Function(E value) test) {
-    // TODO: implement takeWhile
-    throw UnimplementedError();
+    return _idSet.takeWhile(test);
   }
 
   @override
   List<E> toList({bool growable = true}) {
-    // TODO: implement toList
-    throw UnimplementedError();
+    return _idSet.toList(growable: growable);
   }
 
   @override
   Set<E> toSet() {
-    // TODO: implement toSet
-    throw UnimplementedError();
+    return _idSet.toSet();
   }
 
   @override
   Set<E> union(Set<E> other) {
-    // TODO: implement union
-    throw UnimplementedError();
+    return _idSet.union(other);
   }
 
   @override
   Iterable<E> where(bool Function(E element) test) {
-    // TODO: implement where
-    throw UnimplementedError();
+    return _idSet.where(test);
   }
 
   @override
   Iterable<T> whereType<T>() {
-    // TODO: implement whereType
-    throw UnimplementedError();
+    return _idSet.whereType<T>();
   }
-}
-
-abstract base class User<I extends Comparable, T extends User<I, T>>
-    with Identifier<I, T> {
-  @override
-  final I id;
 
   @override
-  final String name;
-
-  const User(this.id, this.name);
+  String toString() {
+    return "{${join(", ")}}";
+  }
 }
