@@ -60,6 +60,13 @@ mixin CasedNameEntity<I extends Identifier<I>> on Entity<I> {
   bool equalsName(String name) => _name == name;
 }
 
+@internal
+extension EntityGetter<I extends Identifier<I>> on Entity<I> {
+  I get id => _id;
+
+  String get name => _name;
+}
+
 abstract base class Group<I extends Identifier<I>> extends Entity<I> {
   const Group(super.id, super.name);
 }
