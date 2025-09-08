@@ -1,3 +1,9 @@
+## 3.0.0
+
+* String will be parsed UTF-16 without conversion.
+* Cease all free allocation APIs from C header file that all dynamic allocation will be occured internally.
+* Change Dart SDK constraint to `^3.8.0` as well as serval dependencies.
+
 ## 2.1.0
 
 * Change Dart SDK constraint to `^3.6.0` for applying monorepo support.

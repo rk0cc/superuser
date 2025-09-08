@@ -1,0 +1,50 @@
+name: Demo build
+on:
+  workflow_dispatch:
+jobs:
+  build_win:
+    name: Windows build
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.x
+      - name: Get dependencies
+        working-directory: ./demo
+        run: flutter pub upgrade
+      - name: Build example
+        working-directory: ./demo
+        run: flutter build windows --release
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: superuser_demo_windows
+          path: demo/build/windows/x64/runner/Release/
+  build_linux:
+    name: Linux build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.x
+      - name: Install tools
+        run: sudo apt update && sudo apt install curl git unzip xz-utils zip libglu1-mesa clang cmake ninja-build pkg-config libgtk-3-dev libstdc++-12-dev -y
+      - name: Get dependencies
+        working-directory: ./demo
+        run: flutter pub upgrade
+      - name: Build example
+        run: flutter build linux --release
+        working-directory: ./demo
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: superuser_demo_linux
+          path: demo/build/linux/x64/release/bundle/

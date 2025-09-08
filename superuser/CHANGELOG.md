@@ -1,3 +1,11 @@
+## 3.0.0
+
+* Change Dart SDK constraint to `^3.8.0`
+* Windows
+    * Adapt UTF-16 for parsing string in Windows plugin rather than converting to UTF-8.
+* Unix
+    * Add few groups name for detecting superuser groups in other Unix platform.
+
 ## 2.1.1
 
 * Case sensitivity in group set is depends on Operating System now (only Windows is case insensitive).

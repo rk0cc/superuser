@@ -1,3 +1,8 @@
+## 3.0.0
+
+* Change Dart constraint to `^3.8.0`
+* Add more superuser groups name detection.
+
 ## 2.1.0
 
 * Change Dart SDK constraint to `^3.6.0` for applying monorepo support.
