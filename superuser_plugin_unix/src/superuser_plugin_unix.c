@@ -156,8 +156,8 @@ FFI_PLUGIN_EXPORT ERRCODE is_sudo_group(bool *result)
     return 0;
 }
 
-// Flush dynamic allocated pointers.
-FFI_PLUGIN_EXPORT void flush(void *ptr)
+// Flush dynamic allocated group pointers.
+FFI_PLUGIN_EXPORT void flush_group(gid_t *groups)
 {
-    free(ptr);
+    free(groups);
 }

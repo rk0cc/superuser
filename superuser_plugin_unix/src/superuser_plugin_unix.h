@@ -32,7 +32,7 @@ extern "C"
     // system.
     FFI_PLUGIN_EXPORT ERRCODE is_sudo_group(bool *result);
 
-    // Flush dynamic allocated pointers.
+    // Flush dynamic allocated group pointers.
     FFI_PLUGIN_EXPORT void flush_group(gid_t *groups);
 
 #ifdef __cplusplus
