@@ -150,7 +150,7 @@ FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(LPWSTR **groups)
     LOCALGROUP_USERS_INFO_0 *lg = (LOCALGROUP_USERS_INFO_0 *)buf;
     for (DWORD i = 0; i < entries; i++)
     {
-        if (!wcscpy_s((*groups)[i], MAX_USERNAME_CHAR, lg[i].lgrui0_name))
+        if (wcscpy_s((*groups)[i], MAX_USERNAME_CHAR, lg[i].lgrui0_name))
         {
             NetApiBufferFree(buf);
 
