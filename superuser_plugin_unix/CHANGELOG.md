@@ -1,7 +1,8 @@
 ## 3.0.0
 
 * Change Dart constraint to `^3.8.0`
-* Add more superuser groups name detection.
+* Add various UNIX system of superuser groups name.
+* Resolve name resolve error when fetching groups.
 
 ## 2.1.0
 
