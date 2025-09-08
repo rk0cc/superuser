@@ -15,115 +15,76 @@ import 'dart:ffi' as ffi;
 final class SuperuserPluginWindowsBindings {
   /// Holds the symbol lookup function.
   final ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
-      _lookup;
+  _lookup;
 
   /// The symbols are looked up in [dynamicLibrary].
   SuperuserPluginWindowsBindings(ffi.DynamicLibrary dynamicLibrary)
-      : _lookup = dynamicLibrary.lookup;
+    : _lookup = dynamicLibrary.lookup;
 
   /// The symbols are looked up with [lookup].
   SuperuserPluginWindowsBindings.fromLookup(
-      ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
-          lookup)
-      : _lookup = lookup;
+    ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName) lookup,
+  ) : _lookup = lookup;
 
   /// Verify user who execute program has admin right.
-  int is_admin_user(
-    ffi.Pointer<ffi.Bool> result,
-  ) {
-    return _is_admin_user(
-      result,
-    );
+  int is_admin_user(ffi.Pointer<ffi.Bool> result) {
+    return _is_admin_user(result);
   }
 
   late final _is_admin_userPtr =
       _lookup<ffi.NativeFunction<ERRCODE Function(ffi.Pointer<ffi.Bool>)>>(
-          'is_admin_user');
-  late final _is_admin_user =
-      _is_admin_userPtr.asFunction<int Function(ffi.Pointer<ffi.Bool>)>();
+        'is_admin_user',
+      );
+  late final _is_admin_user = _is_admin_userPtr
+      .asFunction<int Function(ffi.Pointer<ffi.Bool>)>();
 
   /// Determine this program is executed with admin.
-  int is_elevated(
-    ffi.Pointer<ffi.Bool> result,
-  ) {
-    return _is_elevated(
-      result,
-    );
+  int is_elevated(ffi.Pointer<ffi.Bool> result) {
+    return _is_elevated(result);
   }
 
   late final _is_elevatedPtr =
       _lookup<ffi.NativeFunction<ERRCODE Function(ffi.Pointer<ffi.Bool>)>>(
-          'is_elevated');
-  late final _is_elevated =
-      _is_elevatedPtr.asFunction<int Function(ffi.Pointer<ffi.Bool>)>();
+        'is_elevated',
+      );
+  late final _is_elevated = _is_elevatedPtr
+      .asFunction<int Function(ffi.Pointer<ffi.Bool>)>();
 
   /// Obtain name of user.
-  int get_current_username(
-    ffi.Pointer<ffi.Pointer<ffi.Char>> result,
-  ) {
-    return _get_current_username(
-      result,
-    );
+  int get_current_username(ffi.Pointer<LPWSTR> result) {
+    return _get_current_username(result);
   }
 
-  late final _get_current_usernamePtr = _lookup<
-      ffi.NativeFunction<
-          ERRCODE Function(
-              ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('get_current_username');
+  late final _get_current_usernamePtr =
+      _lookup<ffi.NativeFunction<ERRCODE Function(ffi.Pointer<LPWSTR>)>>(
+        'get_current_username',
+      );
   late final _get_current_username = _get_current_usernamePtr
-      .asFunction<int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
+      .asFunction<int Function(ffi.Pointer<LPWSTR>)>();
+
+  /// Get length of associated groups for current user.
+  int count_associated_groups_length(PDWORD length) {
+    return _count_associated_groups_length(length);
+  }
+
+  late final _count_associated_groups_lengthPtr =
+      _lookup<ffi.NativeFunction<ERRCODE Function(PDWORD)>>(
+        'count_associated_groups_length',
+      );
+  late final _count_associated_groups_length =
+      _count_associated_groups_lengthPtr.asFunction<int Function(PDWORD)>();
 
   /// Obtain user's associated group in local system.
-  int get_associated_groups(
-    ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>> groups,
-    ffi.Pointer<DWORD> length,
-  ) {
-    return _get_associated_groups(
-      groups,
-      length,
-    );
+  int get_associated_groups(ffi.Pointer<ffi.Pointer<LPWSTR>> groups) {
+    return _get_associated_groups(groups);
   }
 
-  late final _get_associated_groupsPtr = _lookup<
-      ffi.NativeFunction<
-          ERRCODE Function(ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>>,
-              ffi.Pointer<DWORD>)>>('get_associated_groups');
-  late final _get_associated_groups = _get_associated_groupsPtr.asFunction<
-      int Function(ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>>,
-          ffi.Pointer<DWORD>)>();
-
-  /// Free allocated memory of string.
-  void flush_cstr(
-    ffi.Pointer<ffi.Char> str,
-  ) {
-    return _flush_cstr(
-      str,
-    );
-  }
-
-  late final _flush_cstrPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Char>)>>(
-          'flush_cstr');
-  late final _flush_cstr =
-      _flush_cstrPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
-
-  /// Wipe all data in 2D allocated memory of string.
-  void flush_cstr_array(
-    ffi.Pointer<ffi.Pointer<ffi.Char>> str_array,
-    int length,
-  ) {
-    return _flush_cstr_array(
-      str_array,
-      length,
-    );
-  }
-
-  late final _flush_cstr_arrayPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(
-              ffi.Pointer<ffi.Pointer<ffi.Char>>, DWORD)>>('flush_cstr_array');
-  late final _flush_cstr_array = _flush_cstr_arrayPtr
-      .asFunction<void Function(ffi.Pointer<ffi.Pointer<ffi.Char>>, int)>();
+  late final _get_associated_groupsPtr =
+      _lookup<
+        ffi.NativeFunction<ERRCODE Function(ffi.Pointer<ffi.Pointer<LPWSTR>>)>
+      >('get_associated_groups');
+  late final _get_associated_groups = _get_associated_groupsPtr
+      .asFunction<int Function(ffi.Pointer<ffi.Pointer<LPWSTR>>)>();
 }
 
 typedef DWORD = ffi.UnsignedLong;
@@ -132,3 +93,9 @@ typedef DartDWORD = int;
 /// Returned value indicates the process result, which
 /// uses non-zero values to denotes problem during processing.
 typedef ERRCODE = DWORD;
+typedef WCHAR = ffi.WChar;
+typedef DartWCHAR = int;
+typedef LPWSTR = ffi.Pointer<WCHAR>;
+typedef PDWORD = ffi.Pointer<DWORD>;
+
+const int MAX_USERNAME_CHAR = 257;

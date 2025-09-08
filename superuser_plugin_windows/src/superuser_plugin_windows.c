@@ -4,17 +4,7 @@
 
 #include "superuser_plugin_windows.h"
 
-#define MAX_USERNAME_CHAR 257
 #define WIN_ADMIN_PARAM L"Administrators"
-
-BOOL __wchar_to_utf8(WCHAR *wc, char **utf)
-{
-    int buf8_size = WideCharToMultiByte(CP_UTF8, 0, wc, -1, NULL, 0, NULL, NULL);
-
-    *utf = (char *)calloc(buf8_size, sizeof(char));
-
-    return WideCharToMultiByte(CP_UTF8, 0, wc, -1, *utf, buf8_size, NULL, NULL);
-}
 
 ERRCODE __obtain_user_local_group(LPBYTE *gp, DWORD *entries, DWORD *total)
 {
@@ -31,7 +21,7 @@ ERRCODE __obtain_user_local_group(LPBYTE *gp, DWORD *entries, DWORD *total)
     if (status)
         return status;
 
-    return 0;
+    return ERROR_SUCCESS;
 }
 
 int __sort_search_lguser(const void *a, const void *b)
@@ -70,7 +60,7 @@ FFI_PLUGIN_EXPORT ERRCODE is_admin_user(bool *result)
 
     NetApiBufferFree(buf);
 
-    return 0;
+    return ERROR_SUCCESS;
 }
 
 // Determine this program is executed with admin.
@@ -108,30 +98,22 @@ FFI_PLUGIN_EXPORT ERRCODE is_elevated(bool *result)
 }
 
 // Obtain name of user.
-FFI_PLUGIN_EXPORT ERRCODE get_current_username(char **result)
+FFI_PLUGIN_EXPORT ERRCODE get_current_username(LPWSTR *result)
 {
-    WCHAR buffer[MAX_USERNAME_CHAR];
-    DWORD bufLen = sizeof(buffer) / sizeof(buffer[0]);
+    WCHAR ubuf[MAX_USERNAME_CHAR];
+    DWORD ubufLen = sizeof(ubuf) / sizeof(ubuf[0]);
 
     SetLastError(0);
-    if (!GetUserNameW(buffer, &bufLen))
+    if (!GetUserNameW(ubuf, &ubufLen))
         return GetLastError();
 
-    SetLastError(0);
-    char *tmp_result;
+    errno_t cpy_errno = wcscpy_s(*result, MAX_USERNAME_CHAR, ubuf);
 
-    if (!__wchar_to_utf8(buffer, &tmp_result))
-    {
-        free(tmp_result);
-        return GetLastError();
-    }
-
-    *result = tmp_result;
-    return 0;
+    return cpy_errno ? ERROR_INVALID_PARAMETER : 0;
 }
 
-// Obtain user's associated group in local system.
-FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(char ***groups, DWORD *length)
+// Get length of associated groups for current user.
+FFI_PLUGIN_EXPORT ERRCODE count_associated_groups_length(PDWORD length)
 {
     LPBYTE buf;
     DWORD entries, total;
@@ -145,43 +127,38 @@ FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(char ***groups, DWORD *length)
         return err;
     }
 
-    char **tmp_groups = (char **)calloc(entries, sizeof(char *));
+    *length = entries;
+
+    return ERROR_SUCCESS;
+}
+
+// Obtain user's associated group in local system.
+FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(LPWSTR **groups)
+{
+    LPBYTE buf;
+    DWORD entries, total;
+
+    ERRCODE err = __obtain_user_local_group(&buf, &entries, &total);
+    if (err)
+    {
+        if (buf)
+            NetApiBufferFree(buf);
+
+        return err;
+    }
 
     LOCALGROUP_USERS_INFO_0 *lg = (LOCALGROUP_USERS_INFO_0 *)buf;
     for (DWORD i = 0; i < entries; i++)
     {
-        if (!__wchar_to_utf8(lg[i].lgrui0_name, &tmp_groups[i]))
+        if (!wcscpy_s((*groups)[i], MAX_USERNAME_CHAR, lg[i].lgrui0_name))
         {
             NetApiBufferFree(buf);
 
-            for (DWORD j = i; j >= 0; j--)
-                free(tmp_groups[j]);
-
-            free(tmp_groups);
-
-            return GetLastError();
+            return ERROR_INVALID_PARAMETER;
         }
     }
 
     NetApiBufferFree(buf);
 
-    *length = entries;
-    *groups = tmp_groups;
-
     return 0;
-}
-
-// Free allocated memory of string.
-FFI_PLUGIN_EXPORT void flush_cstr(char *str)
-{
-    free(str);
-}
-
-// Wipe all data in 2D allocated memory of string.
-FFI_PLUGIN_EXPORT void flush_cstr_array(char **str_array, DWORD length)
-{
-    for (DWORD i = 0; i < length; i++)
-        flush_cstr(str_array[i]);
-
-    free(str_array);
 }

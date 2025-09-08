@@ -1,6 +1,8 @@
 #ifndef FLUTTER_SUPERUSER_WINDOWS_H
 #define FLUTTER_SUPERUSER_WINDOWS_H
 
+#define MAX_USERNAME_CHAR 257
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -21,16 +23,13 @@ extern "C"
     FFI_PLUGIN_EXPORT ERRCODE is_elevated(bool *result);
 
     // Obtain name of user.
-    FFI_PLUGIN_EXPORT ERRCODE get_current_username(char **result);
+    FFI_PLUGIN_EXPORT ERRCODE get_current_username(LPWSTR *result);
+
+    // Get length of associated groups for current user.
+    FFI_PLUGIN_EXPORT ERRCODE count_associated_groups_length(PDWORD length);
 
     // Obtain user's associated group in local system.
-    FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(char ***groups, DWORD *length);
-
-    // Free allocated memory of string.
-    FFI_PLUGIN_EXPORT void flush_cstr(char *str);
-
-    // Wipe all data in 2D allocated memory of string.
-    FFI_PLUGIN_EXPORT void flush_cstr_array(char **str_array, DWORD length);
+    FFI_PLUGIN_EXPORT ERRCODE get_associated_groups(LPWSTR **groups);
 
 #ifdef __cplusplus
 }
