@@ -5,5 +5,5 @@ updates:
     package-ecosystem: github-actions
     schedule:
       timezone: Asia/Hong_Kong
-      time: 15:00
+      time: "15:00"
       interval: monthly
