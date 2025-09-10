@@ -1,3 +1,7 @@
+## 3.0.0+1
+
+* Fix repository link unreachable problem as the default branch renamed.
+
 ## 3.0.0
 
 * Change Dart SDK constraint to `^3.8.0`

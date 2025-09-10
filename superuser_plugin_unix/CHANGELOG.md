@@ -1,3 +1,8 @@
+## 3.0.0+1
+
+* Fix Flutter and Dart SDK version unaligned problem.
+* Fix repository link unreachable problem as the default branch renamed.
+
 ## 3.0.0
 
 * Change Dart constraint to `^3.8.0`

@@ -1,8 +1,8 @@
 name: superuser
 description: Detect, verify user who execute Flutter program has superuser role and running with superuser permission with replicated UNIX identification commands.
-version: 3.0.0
+version: 3.0.0+1
 homepage: https://github.com/rk0cc/superuser
-repository: https://github.com/rk0cc/superuser/tree/main/superuser
+repository: https://github.com/rk0cc/superuser/tree/current/superuser
 funding:
   - https://github.com/sponsors/rk0cc
 topics:
@@ -13,15 +13,15 @@ topics:
   - ffi
 environment: 
   sdk: ^3.8.0
-  flutter: '>=3.35.0'
+  flutter: '>=3.32.0'
 resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
   meta: ^1.15.0
-  superuser_interfaces: ^3.0.0
-  superuser_plugin_unix: ^3.0.0
-  superuser_plugin_windows: ^3.0.0
+  superuser_interfaces: ^3.0.0+1
+  superuser_plugin_unix: ^3.0.0+1
+  superuser_plugin_windows: ^3.0.0+1
 dev_dependencies:
   flutter_lints: ^6.0.0
 platforms:

@@ -1,11 +1,11 @@
 name: superuser_plugin_windows
 description: "Detect, verify user who execute Flutter program has superuser role in Windows"
-version: 3.0.0
+version: 3.0.0+1
 homepage: https://github.com/rk0cc/superuser
-repository: https://github.com/rk0cc/superuser/tree/main/superuser_plugin_windows
+repository: https://github.com/rk0cc/superuser/tree/current/superuser_plugin_windows
 environment:
   sdk: ^3.8.0
-  flutter: '>=3.35.0'
+  flutter: '>=3.32.0'
 resolution: workspace
 dependencies:
   ffi: ^2.1.4
