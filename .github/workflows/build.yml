@@ -20,7 +20,7 @@ jobs:
         working-directory: ./demo
         run: flutter build windows --release
       - name: Upload build
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: superuser_demo_windows
           path: demo/build/windows/x64/runner/Release/
@@ -44,7 +44,7 @@ jobs:
         run: flutter build linux --release
         working-directory: ./demo
       - name: Upload build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: superuser_demo_linux
           path: demo/build/linux/x64/release/bundle/
