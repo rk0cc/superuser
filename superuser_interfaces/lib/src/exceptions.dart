@@ -11,25 +11,32 @@ class SuperuserProcessError extends Error implements OSError {
   @override
   final String message;
 
+  /// Name of a function, which yield error code such that
+  /// causing this error thrown.
+  final String errReturnedFuncName;
+
   /// Create [SuperuserProcessError] with given [errorCode].
   ///
   /// Optionally, provide a [message] for further explaination
   /// of error.
-  SuperuserProcessError(this.errorCode, [this.message = ""]);
+  SuperuserProcessError({
+    required this.errorCode,
+    required this.errReturnedFuncName,
+    this.message =
+        "Result from native process has been returned with error code.",
+  }) : assert(errReturnedFuncName.trim().isNotEmpty);
 
   @override
   String toString() {
     StringBuffer buf = StringBuffer();
 
-    buf.write("SuperuserProcessError: ");
-
-    if (message.isNotEmpty) {
-      buf
-        ..write(message)
-        ..write(" (error code: $errorCode)");
-    } else {
-      buf.write("process return with error code $errorCode");
-    }
+    buf
+      ..write("SuperuserProcessError: ")
+      ..writeln(message)
+      ..write("\tFunction name in native code: ")
+      ..writeln(errReturnedFuncName)
+      ..write("\tError code: ")
+      ..writeln(errorCode);
 
     return buf.toString();
   }
