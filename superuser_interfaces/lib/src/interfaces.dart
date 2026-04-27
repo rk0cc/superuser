@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'os_string.dart';
+
 /// Shared interface for evaluating superuser status when
 /// executing Flutter program.
 abstract final class SuperuserInterface {
@@ -18,10 +20,10 @@ abstract final class SuperuserInterface {
   bool get isActivated;
 
   /// Retrive name of user, who run this program.
-  String get whoAmI;
+  OSString get whoAmI;
 
   /// Obtains all groups name that this user is associated.
-  Iterable<String> get groups;
+  OSStringsSet get groups;
 }
 
 /// Platform specified [SuperuserInterface] to retrive properties from
@@ -55,8 +57,10 @@ abstract base class SuperuserPlatform implements SuperuserInterface {
 ///
 /// It is ideal for widget testing that it can simulate
 /// superuser status without
-/// [Run as administrator](https://learn.microsoft.com/en-us/troubleshoot/windows-server/shell-experience/use-run-as-start-app-admin)
-/// or [`sudo` command](https://man7.org/linux/man-pages/man8/sudo.8.html).
+/// ["Run as administrator"](https://learn.microsoft.com/en-us/troubleshoot/windows-server/shell-experience/use-run-as-start-app-admin)
+/// for Windows, [`sudo`](https://man7.org/linux/man-pages/man8/sudo.8.html) for most UNIX system
+/// or prompting [polkit](https://www.freedesktop.org/software/polkit/docs/latest/polkit.8.html)
+/// for common desktop environments of Linux distros.
 final class MockSuperuser implements SuperuserInterface {
   @override
   final bool isSuperuser;
@@ -65,17 +69,23 @@ final class MockSuperuser implements SuperuserInterface {
   final bool isActivated;
 
   @override
-  final String whoAmI;
+  final OSString whoAmI;
 
   @override
-  final Set<String> groups;
+  final OSStringsSet groups;
 
   /// Create mocked properties of [SuperuserInterface] to emulate
   /// superuser status.
-  const MockSuperuser({
+  /// 
+  /// [whoAmI] and [groups] will be applied the same [OSString]
+  /// matching method by configuring [matchingFlag], which has been
+  /// instructed in [OSString.new] already.
+  MockSuperuser({
     this.isSuperuser = false,
     this.isActivated = false,
-    this.whoAmI = "",
-    this.groups = const <String>{},
-  });
+    String whoAmI = "",
+    Set<String> groups = const {},
+    int matchingFlag = OSString.DEFAULT_MATCH,
+  }) : whoAmI = OSString(whoAmI, matchingFlag),
+       groups = OSStringsSet.fromStrings(groups, matchingFlag);
 }

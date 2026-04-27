@@ -11,9 +11,12 @@ class SuperuserProcessError extends Error implements OSError {
   @override
   final String message;
 
-  /// Name of a function, which yield error code such that
-  /// causing this error thrown.
-  final String errReturnedFuncName;
+  /// Name of functions from FFI that it cause this error thrown.
+  /// 
+  /// `entryPoint` refers to a FFI function, which called directly
+  /// from Dart VM and `nativeAPI` refers to the name if native API
+  /// function, which is a root cause of triggering this error.
+  final ({String entryPoint, String nativeAPI}) functionName;
 
   /// Create [SuperuserProcessError] with given [errorCode].
   ///
@@ -21,10 +24,15 @@ class SuperuserProcessError extends Error implements OSError {
   /// of error.
   SuperuserProcessError({
     required this.errorCode,
-    required this.errReturnedFuncName,
+    required this.functionName,
     this.message =
         "Result from native process has been returned with error code.",
-  }) : assert(errReturnedFuncName.trim().isNotEmpty);
+  }) : assert(
+         [
+           functionName.entryPoint,
+           functionName.nativeAPI,
+         ].every((funcName) => funcName.trim().isNotEmpty),
+       );
 
   @override
   String toString() {
@@ -34,7 +42,7 @@ class SuperuserProcessError extends Error implements OSError {
       ..write("SuperuserProcessError: ")
       ..writeln(message)
       ..write("\tFunction name in native code: ")
-      ..writeln(errReturnedFuncName)
+      ..writeln(functionName.nativeAPI)
       ..write("\tError code: ")
       ..writeln(errorCode);
 
