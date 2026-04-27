@@ -1,3 +1,13 @@
+## 4.0.0
+
+* New type: `OSString` and `OSStringsSet`
+    * These types are applied into `whoAmI` and `groups` getter to align character matching
+      staregy in running platforms.
+* Directly provide function name of native API when `SuperuserProcessError` is going to
+  throw when errors occur in FFI.
+* Cease Flutter dependencies
+* Increase minimum Dart SDK to `3.10.0` for implementing FFI via hook.
+
 ## 3.0.0+1
 
 * Fix repository link unreachable problem as the default branch renamed.
