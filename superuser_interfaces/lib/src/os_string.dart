@@ -29,7 +29,7 @@ abstract final class OSString {
   /// Get a default [String] matching behaviour depends on which
   /// OS is used or specify [flag] to override [String] matching
   /// staregy.
-  /// 
+  ///
   /// Value of [flag] is assigned by bitwise operation with
   /// [MATCH_CAPITAL] and [MATCH_SMALL] to enable matching staregy
   /// in capital and small letter case. Therefore, if case sensitive
@@ -84,13 +84,18 @@ abstract final class OSString {
   /// OSString foo = OSString.allCapital("Sample Text");
   /// print(foo <= "Sample Text"); // true
   /// print(foo <= "SAMPLE TEXT"); // true
+  /// print(foo <= "sample text"); // false
   ///
   /// OSString bar = OSString.caseSensitive("Sample Text");
   /// print(bar <= "Sample Text"); // true
   /// print(bar <= "SAMPLE TEXT"); // false
+  /// print(bar <= "sample text"); // false
   /// ```
   bool operator <=(String str) {
-    return toCaseAppliedString() == _convertStrNotation(str);
+    return <String>{
+      _str,
+      toCaseAppliedString(),
+    }.any((notation) => notation == str);
   }
 
   /// Determine the given [OSString] has identical detection method as well as
@@ -174,6 +179,28 @@ final class _CaseSensitiveOSString extends OSString {
   }
 }
 
+mixin _OSStringsSetMixin on SetBase<OSString> {
+  /// Check does it [contains] preferred [OSString]
+  /// in literial.
+  bool containsByString(String str) {
+    return lookupByString(str) != null;
+  }
+
+  /// [lookup] an [OSString] that the given [str]
+  /// is satsified the matching condition.
+  OSString? lookupByString(String str) {
+    return where((osstr) => osstr <= str).singleOrNull;
+  }
+
+  /// Attempt to [remove] element by finding matched [str]
+  /// in [String].
+  bool removeByString(String str) {
+    OSString? pendingRemove = lookupByString(str);
+
+    return pendingRemove != null ? remove(pendingRemove) : false;
+  }
+}
+
 /// A collection of [OSString] with every elements comply matching
 /// staregy when the first [OSString] inserted.
 ///
@@ -189,7 +216,8 @@ final class _CaseSensitiveOSString extends OSString {
 ///   OSString.caseSensitive("baz") // Ignored
 /// ]);
 /// ```
-abstract final class OSStringsSet extends SetBase<OSString> {
+abstract final class OSStringsSet extends SetBase<OSString>
+    with _OSStringsSetMixin {
   const OSStringsSet._();
 
   /// Create empty set of [OSString].
@@ -213,6 +241,8 @@ abstract final class OSStringsSet extends SetBase<OSString> {
   @override
   bool add(OSString value);
 
+  /// Add multiple [elements] with identical matching method defined
+  /// from the [first] element into [OSStringsSet] at once.
   @override
   void addAll(Iterable<OSString> elements);
 
@@ -272,16 +302,12 @@ final class _OSStringsSet extends OSStringsSet {
       return _strs.lookup(element);
     }
 
-    if (element is String) {
-      return _strs.singleWhere((str) => str <= element);
-    }
-
     return null;
   }
 
   @override
   bool remove(Object? value) {
-    return _strs.remove(lookup(value));
+    return _strs.remove(value);
   }
 
   @override
@@ -291,7 +317,13 @@ final class _OSStringsSet extends OSStringsSet {
 }
 
 final class _UnmodifiableOSStringsSet extends UnmodifiableSetView<OSString>
+    with _OSStringsSetMixin
     implements OSStringsSet {
   _UnmodifiableOSStringsSet(Iterable<OSString> source)
     : super(OSStringsSet.of(source));
+
+  @override
+  bool removeByString(String str) {
+    throw UnsupportedError("removeByString");
+  }
 }
