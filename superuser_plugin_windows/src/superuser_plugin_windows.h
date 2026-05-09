@@ -20,7 +20,6 @@ extern "C"
     {
         ERRCODE code;
         WCHAR winapi_func_name[WIN32API_FUNC_WLEN];
-        int line;
     };
 
     typedef struct _SUPERUSER_ERRORINFO SUPERUSER_ERRORINFO;

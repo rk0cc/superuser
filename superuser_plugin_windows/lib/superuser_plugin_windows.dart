@@ -113,10 +113,14 @@ final class WindowsSuperuser extends SuperuserPlatform {
     ffi.Pointer<ffi.UnsignedLong> groupLengthPtr = calloc<ffi.UnsignedLong>();
     late int groupLength;
 
+    print("Running before count FFI called");
+
     try {
       SUPERUSER_ERRORINFO errInfo = count_associated_groups_length(
         groupLengthPtr,
       );
+
+      print("Running after count FFI called");
 
       if (errInfo.code != 0) {
         throw SuperuserProcessError(
@@ -128,7 +132,7 @@ final class WindowsSuperuser extends SuperuserPlatform {
           message: "An error occured when initializing group name extraction.",
         );
       }
-
+      
       groupLength = groupLengthPtr.value;
     } finally {
       calloc.free(groupLengthPtr);
@@ -182,6 +186,7 @@ final class WindowsSuperuser extends SuperuserPlatform {
   }
 
   @override
-  OSStringsSet get groups =>
-      OSStringsSet.fromStrings(_groupsGenetator(), OSString.MATCH_CAPITAL);
+  OSStringsSet get groups => OSStringsSet.unmodifiable(
+    OSStringsSet.fromStrings(_groupsGenetator(), OSString.MATCH_CAPITAL),
+  );
 }

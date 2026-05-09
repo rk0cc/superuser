@@ -35,9 +35,6 @@ final class _SUPERUSER_ERRORINFO extends ffi.Struct {
 
   @ffi.Array.multi([101])
   external ffi.Array<ffi.WChar> winapi_func_name;
-
-  @ffi.Int()
-  external int line;
 }
 
 typedef SUPERUSER_ERRORINFO = _SUPERUSER_ERRORINFO;
