@@ -4,35 +4,25 @@
 // ignore_for_file: type=lint, unused_import
 import 'dart:ffi' as ffi;
 
-@ffi.Native<SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Bool>)>(
-  assetId: "superuser:superuser_plugin_windows/superuser_plugin_windows.dart"
-)
+@ffi.Native<SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Bool>)>()
 external SUPERUSER_ERRORINFO is_admin_user(ffi.Pointer<ffi.Bool> result);
 
-@ffi.Native<SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Bool>)>(
-  assetId: "superuser:superuser_plugin_windows/superuser_plugin_windows.dart"
-)
+@ffi.Native<SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Bool>)>()
 external SUPERUSER_ERRORINFO is_elevated(ffi.Pointer<ffi.Bool> result);
 
-@ffi.Native<SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Pointer<ffi.WChar>>)>(
-  assetId: "superuser:superuser_plugin_windows/superuser_plugin_windows.dart"
-)
+@ffi.Native<SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Pointer<ffi.WChar>>)>()
 external SUPERUSER_ERRORINFO get_current_username(
   ffi.Pointer<ffi.Pointer<ffi.WChar>> result,
 );
 
-@ffi.Native<SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.UnsignedLong>)>(
-  assetId: "superuser:superuser_plugin_windows/superuser_plugin_windows.dart"
-)
+@ffi.Native<SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.UnsignedLong>)>()
 external SUPERUSER_ERRORINFO count_associated_groups_length(
   ffi.Pointer<ffi.UnsignedLong> length,
 );
 
 @ffi.Native<
   SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.WChar>>>)
->(
-  assetId: "superuser:superuser_plugin_windows/superuser_plugin_windows.dart"
-)
+>()
 external SUPERUSER_ERRORINFO get_associated_groups(
   ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.WChar>>> groups,
 );

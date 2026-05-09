@@ -29,7 +29,7 @@ void main(List<String> args) async {
     final builder = CBuilder.library(
       name: "superuser_plugin_windows_$targetArchitecture",
       assetName:
-          "superuser:superuser_plugin_windows/superuser_plugin_windows.dart",
+          "src/win_superuser.g.dart",
       sources: const <String>["src/superuser_plugin_windows.c"],
       libraries: win32Libs,
     );
