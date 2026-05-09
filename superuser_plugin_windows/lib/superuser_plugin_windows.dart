@@ -1,161 +1,187 @@
-import 'dart:ffi';
+import 'dart:ffi' as ffi;
 import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:ffi/ffi.dart' as ffi;
+import 'package:ffi/ffi.dart';
 import 'package:superuser_interfaces/superuser_interfaces.dart';
 
-import 'superuser_plugin_windows_bindings_generated.dart';
+import 'src/win_superuser.g.dart';
 
-const String _libName = 'superuser_plugin_windows';
+typedef _OutWCharString = ffi.Pointer<ffi.WChar>;
+typedef _OutWCharStringPointer = ffi.Pointer<_OutWCharString>;
+typedef _OutWCharString2DPointer = ffi.Pointer<_OutWCharStringPointer>;
 
 /// Construct [SuperuserInterface] based on Windows API.
 final class WindowsSuperuser extends SuperuserPlatform {
-  WindowsSuperuser()
-    : super(() {
-        if (Platform.isWindows) {
-          return DynamicLibrary.open('$_libName.dll');
-        }
+  WindowsSuperuser() : assert(Platform.isWindows);
 
-        throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
-      });
+  static String _fixedWCharArrayToString(ffi.Array<ffi.WChar> array) {
+    final chars = Uint16List.fromList(array.elements);
+    final nullIndex = chars.indexWhere((c) => c == 0);
+
+    if (nullIndex == -1) {
+      throw RangeError("Null terminated does not exist in character array.");
+    }
+
+    return String.fromCharCodes(chars, 0, nullIndex);
+  }
 
   @override
-  bool get isActivated => onGettingProperties((lib) {
-    final SuperuserPluginWindowsBindings bindings =
-        SuperuserPluginWindowsBindings(lib);
-
-    Pointer<Bool> result = ffi.calloc<Bool>();
+  bool get isActivated {
+    ffi.Pointer<ffi.Bool> result = calloc<ffi.Bool>();
 
     try {
-      int errCode = bindings.is_elevated(result);
+      SUPERUSER_ERRORINFO errInfo = is_elevated(result);
 
-      if (errCode != 0) {
+      if (errInfo.code != 0) {
         throw SuperuserProcessError(
-          errCode,
-          "Cannot determine superuser activation status.",
+          errorCode: errInfo.code,
+          functionName: (
+            entryPoint: "isActivated",
+            nativeAPI: _fixedWCharArrayToString(errInfo.winapi_func_name),
+          ),
+          message: "Cannot determine superuser activation status.",
         );
       }
 
       return result.value;
     } finally {
-      ffi.calloc.free(result);
+      calloc.free(result);
     }
-  });
+  }
 
   @override
-  bool get isSuperuser => onGettingProperties((lib) {
-    final SuperuserPluginWindowsBindings bindings =
-        SuperuserPluginWindowsBindings(lib);
-
-    Pointer<Bool> result = ffi.calloc<Bool>();
+  bool get isSuperuser {
+    ffi.Pointer<ffi.Bool> result = calloc<ffi.Bool>();
 
     try {
-      int errCode = bindings.is_admin_user(result);
+      SUPERUSER_ERRORINFO errInfo = is_elevated(result);
 
-      if (errCode != 0) {
+      if (errInfo.code != 0) {
         throw SuperuserProcessError(
-          errCode,
-          "Unable to retrive user's superuser role.",
+          errorCode: errInfo.code,
+          functionName: (
+            entryPoint: "isSuperuser",
+            nativeAPI: _fixedWCharArrayToString(errInfo.winapi_func_name),
+          ),
+          message: "Cannot determine superuser activation status.",
         );
       }
 
       return result.value;
     } finally {
-      ffi.calloc.free(result);
+      calloc.free(result);
     }
-  });
+  }
 
   @override
-  String get whoAmI => onGettingProperties((lib) {
-    final SuperuserPluginWindowsBindings binding =
-        SuperuserPluginWindowsBindings(lib);
-
-    Pointer<WChar> unameBuf = ffi.calloc(MAX_USERNAME_CHAR);
-    Pointer<Pointer<WChar>> ubPtr = ffi.calloc()..value = unameBuf;
+  OSString get whoAmI {
+    _OutWCharString unameBuf = calloc<ffi.WChar>(MAX_USERNAME_CHAR);
+    _OutWCharStringPointer ubPtr = calloc<_OutWCharString>()..value = unameBuf;
 
     try {
-      int errCode = binding.get_current_username(ubPtr);
+      SUPERUSER_ERRORINFO errInfo = get_current_username(ubPtr);
 
-      if (errCode != 0) {
-        ffi.calloc.free(unameBuf);
+      if (errInfo.code != 0) {
+        calloc.free(unameBuf);
 
         throw SuperuserProcessError(
-          errCode,
-          "Unable to extract current username.",
+          errorCode: errInfo.code,
+          functionName: (
+            entryPoint: "whoAmI",
+            nativeAPI: _fixedWCharArrayToString(errInfo.winapi_func_name),
+          ),
+          message: "Unable to extract current username.",
         );
       }
     } finally {
-      ffi.calloc.free(ubPtr);
+      calloc.free(ubPtr);
     }
 
-    try {
-      Pointer<ffi.Utf16> uname = unameBuf.cast<ffi.Utf16>();
+    late String uname;
 
-      return uname.toDartString();
+    try {
+      uname = unameBuf.cast<Utf16>().toDartString();
     } finally {
-      ffi.calloc.free(unameBuf);
+      calloc.free(unameBuf);
     }
-  });
 
-  @override
-  Iterable<String> get groups => onGettingProperties((lib) sync* {
-    final SuperuserPluginWindowsBindings binding =
-        SuperuserPluginWindowsBindings(lib);
+    return OSString.allCapital(uname);
+  }
 
-    late int errCode;
-
-    Pointer<DWORD> gpLengthPtr = ffi.calloc<DWORD>();
-    int gpLength = 0;
+  Iterable<String> _groupsGenetator() sync* {
+    ffi.Pointer<ffi.UnsignedLong> groupLengthPtr = calloc<ffi.UnsignedLong>();
+    late int groupLength;
 
     try {
-      errCode = binding.count_associated_groups_length(gpLengthPtr);
+      SUPERUSER_ERRORINFO errInfo = count_associated_groups_length(
+        groupLengthPtr,
+      );
 
-      if (errCode != 0) {
+      if (errInfo.code != 0) {
         throw SuperuserProcessError(
-          errCode,
-          "Unable to obtain group informations.",
+          errorCode: errInfo.code,
+          functionName: (
+            entryPoint: "_groupsGenerator",
+            nativeAPI: _fixedWCharArrayToString(errInfo.winapi_func_name),
+          ),
+          message: "An error occured when initializing group name extraction.",
         );
       }
 
-      gpLength = gpLengthPtr.value;
+      groupLength = groupLengthPtr.value;
     } finally {
-      ffi.calloc.free(gpLengthPtr);
+      calloc.free(groupLengthPtr);
     }
 
-    Pointer<Pointer<WChar>> groupNamesPtr = ffi.calloc(gpLength);
-    for (int gpIdx = 0; gpIdx < gpLength; gpIdx++) {
-      groupNamesPtr[gpIdx] = ffi.calloc(MAX_USERNAME_CHAR);
+    _OutWCharStringPointer groupNamesPtr = calloc<_OutWCharString>(groupLength);
+    for (int groupIndex = 0; groupIndex < groupLength; groupIndex++) {
+      groupNamesPtr[groupIndex] = calloc<ffi.WChar>(MAX_USERNAME_CHAR);
     }
 
-    Pointer<Pointer<Pointer<WChar>>> groupsPtr = ffi.calloc()
+    _OutWCharString2DPointer groupsPtr = calloc<_OutWCharStringPointer>()
       ..value = groupNamesPtr;
 
-    errCode = 0;
-    int current = 0;
-
     try {
-      errCode = binding.get_associated_groups(groupsPtr);
+      SUPERUSER_ERRORINFO errInfo = get_associated_groups(groupsPtr);
 
-      if (errCode != 0) {
+      if (errInfo.code != 0) {
+        for (int i = 0; i < groupLength; i++) {
+          calloc.free(groupNamesPtr[i]);
+        }
+        calloc.free(groupNamesPtr);
+
         throw SuperuserProcessError(
-          errCode,
-          "Unable to obtain group informations.",
+          errorCode: errInfo.code,
+          functionName: (
+            entryPoint: "_groupsGenerator",
+            nativeAPI: _fixedWCharArrayToString(errInfo.winapi_func_name),
+          ),
+          message: "Cannot extract groups information.",
         );
       }
+    } finally {
+      calloc.free(groupsPtr);
+    }
 
-      for (; current < gpLength; current++) {
-        Pointer<ffi.Utf16> groupName = groupNamesPtr[current].cast<ffi.Utf16>();
+    int cursor = 0;
+    try {
+      for (; cursor < groupLength; cursor++) {
+        ffi.Pointer<Utf16> groupNameStr = groupNamesPtr[cursor].cast<Utf16>();
 
-        yield groupName.toDartString();
+        yield groupNameStr.toDartString();
 
-        ffi.calloc.free(groupNamesPtr[current]);
+        calloc.free(groupNameStr);
       }
     } finally {
-      for (; current < gpLength; current++) {
-        ffi.calloc.free(groupNamesPtr[current]);
+      for (; cursor < groupLength; cursor++) {
+        calloc.free(groupNamesPtr[cursor]);
       }
-      ffi.calloc.free(groupNamesPtr);
-      ffi.calloc.free(groupsPtr);
+      calloc.free(groupNamesPtr);
     }
-  });
+  }
+
+  @override
+  OSStringsSet get groups =>
+      OSStringsSet.fromStrings(_groupsGenetator(), OSString.MATCH_CAPITAL);
 }
