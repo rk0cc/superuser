@@ -121,6 +121,7 @@ final class WindowsSuperuser extends SuperuserPlatform {
       );
 
       print("Running after count FFI called");
+      print("Obtained group length: ${groupLengthPtr.value}");
 
       if (errInfo.code != 0) {
         throw SuperuserProcessError(

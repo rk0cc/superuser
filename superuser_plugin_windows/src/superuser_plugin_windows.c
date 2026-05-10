@@ -1,22 +1,22 @@
-#include <Windows.h>
-#include <LM.h>
 #include <stdlib.h>
 
 #include "superuser_plugin_windows.h"
 
 #define WIN_ADMIN_PARAM L"Administrators"
+#define WINAPICALL_STATUS \
+    SetLastError(0);      \
+    BOOL
 
 void __get_current_username(SUPERUSER_ERRORINFO *errinfo, LPWSTR *uname)
 {
     WCHAR ubuf[MAX_USERNAME_CHAR];
     DWORD ubufLen = sizeof(ubuf) / sizeof(ubuf[0]);
 
-    SetLastError(0);
-    BOOL success = GetUserNameW(ubuf, &ubufLen);
+    WINAPICALL_STATUS success = GetUserNameW(ubuf, &ubufLen);
     if (!success)
     {
         errinfo->code = GetLastError();
-        wcscpy_s(errinfo->winapi_func_name, WIN32API_FUNC_WLEN, L"GetUserNameW");
+        wcscpy_s(errinfo->winapi_func_name, WIN32API_FUNC_WLEN, L"GetUserNameW (__get_current_username)");
 
         return;
     }
@@ -25,125 +25,74 @@ void __get_current_username(SUPERUSER_ERRORINFO *errinfo, LPWSTR *uname)
     if (cpy_errno != ERROR_SUCCESS)
     {
         errinfo->code = cpy_errno;
-        wcscpy_s(errinfo->winapi_func_name, WIN32API_FUNC_WLEN, L"wcscpy_s");
+        wcscpy_s(errinfo->winapi_func_name, WIN32API_FUNC_WLEN, L"wcscpy_s (__get_current_username)");
     }
 }
 
-void __obtain_user_local_group(SUPERUSER_ERRORINFO *errinfo, LPBYTE *gp, PDWORD entries, PDWORD total)
+void __open_handle_token(SUPERUSER_ERRORINFO *errinfo, HANDLE *hToken)
 {
-    WCHAR ubuf[MAX_USERNAME_CHAR];
-    __get_current_username(errinfo, &ubuf);
-    
-    if (errinfo->code != 0)
-        return;
+    WINAPICALL_STATUS opened = OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, hToken);
 
-
-    NET_API_STATUS status = NetUserGetLocalGroups(NULL,
-                                                  ubuf,
-                                                  0,
-                                                  LG_INCLUDE_INDIRECT,
-                                                  gp,
-                                                  MAX_PREFERRED_LENGTH,
-                                                  entries,
-                                                  total);
-    if (status != NERR_Success)
+    if (!opened)
     {
-        errinfo->code = status;
-        wcscpy_s(errinfo->winapi_func_name, WIN32API_FUNC_WLEN, L"NetUserGetLocalGroups");
+        errinfo->code = GetLastError();
+        wcscpy_s(errinfo->winapi_func_name, WIN32API_FUNC_WLEN, L"OpenProcessToken (__open_handle_token)");
     }
 }
 
-int __sort_search_lguser(const void *a, const void *b)
+void __get_group_token(SUPERUSER_ERRORINFO *errinfo, HANDLE *hToken, PTOKEN_GROUPS *gpInfo)
+{
+    DWORD gpSize;
+    WINAPICALL_STATUS hasBuf = GetTokenInformation(hToken,
+                                                   TokenGroups,
+                                                   NULL,
+                                                   0,
+                                                   &gpSize);
+    ERRCODE bufErrCode = GetLastError();
+    if (bufErrCode != ERROR_INSUFFICIENT_BUFFER)
+    {
+        errinfo->code = bufErrCode;
+        wcscpy_s(errinfo->winapi_func_name, WIN32API_FUNC_WLEN, L"GetTokenInformation (__get_group_token, buffer)");
+
+        return;
+    }
+
+    SetLastError(0);
+    PTOKEN_GROUPS tmpGpInfo = (PTOKEN_GROUPS)LocalAlloc(LPTR, gpSize);
+    if (!tmpGpInfo)
+    {
+        errinfo->code = GetLastError();
+        wcscpy_s(errinfo->winapi_func_name, WIN32API_FUNC_WLEN, L"LocalAlloc (__get_group_token)");
+
+        return;
+    }
+
+    WINAPICALL_STATUS gpFetched = GetTokenInformation(hToken,
+                                                      TokenGroups,
+                                                      tmpGpInfo,
+                                                      gpSize,
+                                                      &gpSize);
+
+    if (!gpFetched)
+    {
+        LocalFree(tmpGpInfo);
+
+        errinfo->code = GetLastError();
+        wcscpy_s(errinfo->winapi_func_name, WIN32API_FUNC_WLEN, L"GetTokenInformation (__get_group_token, fetch)");
+
+        return;
+    }
+
+    gpInfo = &tmpGpInfo;
+}
+
+int __sort_search_group_name(const void *a, const void *b)
 {
     LPCWCHAR aChar, bChar;
 
-    aChar = (*(LOCALGROUP_USERS_INFO_0 *)a).lgrui0_name;
-    bChar = (*(LOCALGROUP_USERS_INFO_0 *)b).lgrui0_name;
+    // TODO: Reimplement
 
     return wcscmp(aChar, bChar);
-}
-
-// Verify user who execute program has admin right.
-FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO is_admin_user(bool *result)
-{
-    SUPERUSER_ERRORINFO errinfo = {0};
-
-    LPBYTE buf;
-    DWORD entries, total;
-
-    __obtain_user_local_group(&errinfo, &buf, &entries, &total);
-    if (errinfo.code != ERROR_SUCCESS)
-    {
-        if (buf)
-            NetApiBufferFree(buf);
-
-        return errinfo;
-    }
-
-    LOCALGROUP_USERS_INFO_0 key = {.lgrui0_name = WIN_ADMIN_PARAM};
-    LOCALGROUP_USERS_INFO_0 *lg = (LOCALGROUP_USERS_INFO_0 *)buf;
-
-    qsort(lg, entries, sizeof(LOCALGROUP_USERS_INFO_0), __sort_search_lguser);
-    LOCALGROUP_USERS_INFO_0 *found = (LOCALGROUP_USERS_INFO_0 *)bsearch(&key,
-                                                                        lg,
-                                                                        entries,
-                                                                        sizeof(LOCALGROUP_USERS_INFO_0),
-                                                                        __sort_search_lguser);
-
-    bool tmp_result = found != NULL;
-    *result = tmp_result;
-
-    NetApiBufferFree(buf);
-
-    return errinfo;
-}
-
-// Determine this program is executed with admin.
-FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO is_elevated(bool *result)
-{
-    SUPERUSER_ERRORINFO errinfo = {0};
-    HANDLE token;
-
-    SetLastError(0);
-    BOOL tokenOpened = OpenProcessToken(GetCurrentProcess(),
-                                        TOKEN_QUERY,
-                                        &token);
-    if (!tokenOpened)
-    {
-        if (token)
-            CloseHandle(token);
-
-        errinfo.code = GetLastError();
-        wcscpy_s(errinfo.winapi_func_name, WIN32API_FUNC_WLEN, L"OpenProcessToken");
-
-        return errinfo;
-    }
-
-    TOKEN_ELEVATION elevation;
-    DWORD cbSize = sizeof(TOKEN_ELEVATION);
-
-    SetLastError(0);
-    BOOL hasInfo = GetTokenInformation(token,
-                                       TokenElevation,
-                                       &elevation,
-                                       sizeof(elevation),
-                                       &cbSize);
-    if (!hasInfo)
-    {
-        CloseHandle(token);
-
-        errinfo.code = GetLastError();
-        wcscpy_s(errinfo.winapi_func_name, WIN32API_FUNC_WLEN, L"GetTokenInformation");
-
-        return errinfo;
-    }
-
-    bool tmp_result = elevation.TokenIsElevated ? true : false;
-    *result = tmp_result;
-
-    CloseHandle(token);
-
-    return errinfo;
 }
 
 // Obtain name of user.
@@ -160,20 +109,30 @@ FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO get_current_username(LPWSTR *result)
 FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO count_associated_groups_length(PDWORD length)
 {
     SUPERUSER_ERRORINFO errinfo = {0};
+    HANDLE hToken = NULL;
 
-    LPBYTE buf = NULL;
-    DWORD entries, total;
-
-    __obtain_user_local_group(&errinfo, &buf, &entries, &total);
-    if (errinfo.code)
+    __open_handle_token(&errinfo, &hToken);
+    if (errinfo.code != 0)
     {
-        if (buf)
-            NetApiBufferFree(buf);
+        if (hToken != NULL)
+            CloseHandle(hToken);
 
         return errinfo;
     }
 
-    *length = entries;
+    PTOKEN_GROUPS gpInfo;
+    __get_group_token(&errinfo, &hToken, &gpInfo);
+    if (errinfo.code != 0)
+    {
+        CloseHandle(hToken);
+
+        return errinfo;
+    }
+
+    *length = gpInfo->GroupCount;
+
+    LocalFree(gpInfo);
+    CloseHandle(hToken);
 
     return errinfo;
 }
@@ -182,35 +141,158 @@ FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO count_associated_groups_length(PDWORD leng
 FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO get_associated_groups(LPWSTR **groups)
 {
     SUPERUSER_ERRORINFO errinfo = {0};
+    HANDLE hToken = NULL;
 
-    LPBYTE buf = NULL;
-    DWORD entries, total;
-
-    __obtain_user_local_group(&errinfo, &buf, &entries, &total);
-    if (errinfo.code)
+    __open_handle_token(&errinfo, &hToken);
+    if (errinfo.code != 0)
     {
-        if (buf)
-            NetApiBufferFree(buf);
+        if (hToken != NULL)
+            CloseHandle(hToken);
 
         return errinfo;
     }
 
-    LOCALGROUP_USERS_INFO_0 *lg = (LOCALGROUP_USERS_INFO_0 *)buf;
-    for (DWORD i = 0; i < entries; i++)
+    PTOKEN_GROUPS gpInfo;
+    __get_group_token(&errinfo, &hToken, &gpInfo);
+    if (errinfo.code != 0)
     {
-        errno_t cp_err = wcscpy_s((*groups)[i], MAX_USERNAME_CHAR, lg[i].lgrui0_name);
-        if (cp_err)
-        {
-            NetApiBufferFree(buf);
+        CloseHandle(hToken);
 
-            errinfo.code = cp_err;
-            wcscpy_s(errinfo.winapi_func_name, WIN32API_FUNC_WLEN, L"wcscpy_s");
-
-            return errinfo;
-        }
+        return errinfo;
     }
 
-    NetApiBufferFree(buf);
+    DWORD offerGroupsSize = sizeof(*groups) / sizeof((*groups)[0]);
+    if (offerGroupsSize < gpInfo->GroupCount)
+    {
+        LocalFree(gpInfo);
+        CloseHandle(hToken);
+
+        errinfo.code = ERROR_INSUFFICIENT_BUFFER;
+        wcscpy_s(errinfo.winapi_func_name, WIN32API_FUNC_WLEN, L"<internal> (get_associated_groups)");
+
+        return errinfo;
+    }
+
+    return errinfo;
+}
+
+// Verify user who execute program has admin right.
+FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO is_admin_user(bool *result)
+{
+    SUPERUSER_ERRORINFO errinfo = {0};
+    HANDLE hToken = NULL;
+
+    __open_handle_token(&errinfo, &hToken);
+    if (errinfo.code != 0)
+    {
+        if (hToken != NULL)
+            CloseHandle(hToken);
+
+        return errinfo;
+    }
+
+    TOKEN_ELEVATION_TYPE elevateType;
+    DWORD cbSize = 0;
+
+    WINAPICALL_STATUS hasInfo = GetTokenInformation(hToken,
+                                                    TokenElevationType,
+                                                    &elevateType,
+                                                    sizeof(elevateType),
+                                                    &cbSize);
+
+    if (!hasInfo)
+    {
+        CloseHandle(hToken);
+
+        errinfo.code = GetLastError();
+        wcscpy_s(errinfo.winapi_func_name, WIN32API_FUNC_WLEN, L"GetTokenInformation (is_admin_user)");
+
+        return errinfo;
+    }
+
+    if (elevateType == TokenElevationTypeFull ||
+        elevateType == TokenElevationTypeLimited)
+    {
+        /* Appearly this user run with prove of admin right already. */
+        *result = true;
+
+        CloseHandle(hToken);
+
+        return errinfo;
+    }
+
+    /* Fallback approach when the one-shot test yield failed */
+
+    SID_IDENTIFIER_AUTHORITY ntAuth = SECURITY_NT_AUTHORITY;
+    PSID adminGp = NULL;
+    WINAPICALL_STATUS fallbackAdminInit = AllocateAndInitializeSid(&ntAuth,
+                                                                   2,
+                                                                   SECURITY_BUILTIN_DOMAIN_RID,
+                                                                   DOMAIN_ALIAS_RID_ADMINS,
+                                                                   0, 0, 0, 0, 0, 0,
+                                                                   &adminGp);
+
+    if (!fallbackAdminInit)
+    {
+        CloseHandle(hToken);
+
+        errinfo.code = GetLastError();
+        wcscpy_s(errinfo.winapi_func_name, WIN32API_FUNC_WLEN, L"AllocateAndInitializeSid (is_admin_user)");
+
+        return errinfo;
+    }
+
+    WINAPICALL_STATUS fallbackAdminCheck = CheckTokenMembership(NULL,
+                                                                adminGp,
+                                                                result);
+
+    if (!fallbackAdminCheck)
+    {
+        errinfo.code = GetLastError();
+        wcscpy_s(errinfo.winapi_func_name, WIN32API_FUNC_WLEN, L"CheckTokenMembership (is_admin_user)");
+    }
+
+    FreeSid(adminGp);
+    CloseHandle(hToken);
+    return errinfo;
+}
+
+// Determine this program is executed with admin.
+FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO is_elevated(bool *result)
+{
+    SUPERUSER_ERRORINFO errinfo = {0};
+    HANDLE hToken = NULL;
+
+    __open_handle_token(&errinfo, &hToken);
+    if (errinfo.code != 0)
+    {
+        if (hToken != NULL)
+            CloseHandle(hToken);
+
+        return errinfo;
+    }
+
+    TOKEN_ELEVATION elevation;
+    DWORD cbSize = 0;
+
+    WINAPICALL_STATUS hasInfo = GetTokenInformation(hToken,
+                                                    TokenElevation,
+                                                    &elevation,
+                                                    sizeof(elevation),
+                                                    &cbSize);
+    if (!hasInfo)
+    {
+        CloseHandle(hToken);
+
+        errinfo.code = GetLastError();
+        wcscpy_s(errinfo.winapi_func_name, WIN32API_FUNC_WLEN, L"GetTokenInformation (is_elevated)");
+
+        return errinfo;
+    }
+
+    *result = elevation.TokenIsElevated ? true : false;
+
+    CloseHandle(hToken);
 
     return errinfo;
 }

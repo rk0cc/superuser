@@ -24,12 +24,6 @@ extern "C"
 
     typedef struct _SUPERUSER_ERRORINFO SUPERUSER_ERRORINFO;
 
-    // Verify user who execute program has admin right.
-    FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO is_admin_user(bool *result);
-
-    // Determine this program is executed with admin.
-    FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO is_elevated(bool *result);
-
     // Obtain name of user.
     FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO get_current_username(LPWSTR *result);
 
@@ -39,6 +33,11 @@ extern "C"
     // Obtain user's associated group in local system.
     FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO get_associated_groups(LPWSTR **groups);
 
+    // Verify user who execute program has admin right.
+    FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO is_admin_user(bool *result);
+
+    // Determine this program is executed with admin.
+    FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO is_elevated(bool *result);
 #ifdef __cplusplus
 }
 #endif
