@@ -1,3 +1,8 @@
+## 4.0.0
+
+* Reimplement in Dart hook
+* Cease `netapi32` library due to failure of binding
+
 ## 3.0.0+1
 
 * Fix Flutter and Dart SDK version unaligned problem.
