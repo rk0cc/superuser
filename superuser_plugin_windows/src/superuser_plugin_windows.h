@@ -1,7 +1,7 @@
 #ifndef FLUTTER_SUPERUSER_WINDOWS_H
 #define FLUTTER_SUPERUSER_WINDOWS_H
 
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ < 202311L
+#if !defined(__STDC_VERSION__) || __STDC_VERSION__ < 202311L
 #include <stdbool.h> // C23 make "bool" type as built-in
 #endif
 
