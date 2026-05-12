@@ -18,13 +18,10 @@ void main(List<String> args) {
     "WIN32API_FUNC_WLEN",
     "NETBIOS_NAME_LEN",
   };
-  const structNames = <String>{
-    "_SUPERUSER_ERRORINFO",
-    "_WINDOWS_GROUP_NAME"
-  };
+  const structNames = <String>{"_SUPERUSER_ERRORINFO", "_WINDOWS_GROUP_NAME"};
   final typedefNames = <String>{
     "ERRCODE",
-    ...structNames.map((s) => s.substring(1))
+    ...structNames.map((s) => s.substring(1)),
   };
 
   FfiGenerator(
@@ -35,6 +32,8 @@ void main(List<String> args) {
       include: (declaration) => macroNames.contains(declaration.originalName),
     ),
     typedefs: Typedefs.includeSet(typedefNames),
-    structs: Structs(include: (declaration) => structNames.contains(declaration.originalName))
+    structs: Structs(
+      include: (declaration) => structNames.contains(declaration.originalName),
+    ),
   ).generate();
 }
