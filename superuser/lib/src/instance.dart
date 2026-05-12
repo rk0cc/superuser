@@ -54,7 +54,8 @@ abstract final class SuperuserInstance {
 
     if (!kUnderDevelop && suInterface is MockSuperuser) {
       throw IllegalInstanceError(
-          "Mock instance cannot be used in release mode.");
+        "Mock instance cannot be used in release mode.",
+      );
     }
 
     flushInstance();
@@ -76,7 +77,9 @@ abstract final class SuperuserInstance {
   }
 
   /// Flush existed [SuperuserInterface] instance.
-  @Deprecated("This features is no longer required for Dart hook implementation.")
+  @Deprecated(
+    "This features is no longer required for Dart hook implementation.",
+  )
   static void flushInstance() {
     if (_instance != null) {
       _instance = null;
