@@ -1,0 +1,32 @@
+name: Interface unit test
+on:
+  push:
+    branches:
+      - current
+    paths:
+      - superuser_interfaces/**.dart
+      - .github/workflows/interface_test.yml
+jobs:
+  testing:
+    name: Unit test
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-latest
+          - macos-latest
+          - ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Get dependencies
+        working-directory: ./superuser_interfaces
+        run: dart pub get
+      - name: Run test
+        working-directory: ./superuser_interfaces
+        run: dart test
