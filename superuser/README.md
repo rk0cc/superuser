@@ -29,7 +29,9 @@ import 'package:superuser/mock.dart';
 void main() {
     setUpAll(() {
         // Bind mock instance here
-        SuperuserInstance.bindInstance(const MockSuperuser(whoAmI: "reonaw"));
+        SuperuserInstance.bindInstance(
+            MockSuperuser(whoAmI: "reonaw"),
+        );
     });
     // Do any testes below
 }
@@ -44,7 +46,7 @@ import 'package:superuser/mock.dart';
 
 void main() {
     SuperuserInstance.bindInstance(
-        const MockSuperuser(
+        MockSuperuser(
             whoAmI: "hiderik",
             isSuperuser: true,
             isActivated: true,
