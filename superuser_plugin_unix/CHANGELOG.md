@@ -1,3 +1,7 @@
+## 4.0.1
+
+* Fix `groups` returns mutable set that it suppose should be unmodifiable.
+
 ## 4.0.0
 
 * Dart hook based implementationsda

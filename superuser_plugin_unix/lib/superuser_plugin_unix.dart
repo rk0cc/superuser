@@ -147,8 +147,10 @@ final class UnixSuperuser extends SuperuserPlatform {
   }
 
   @override
-  OSStringsSet get groups => OSStringsSet.fromStrings(
-    _groupGenerator(),
-    OSString.MATCH_CAPITAL | OSString.MATCH_SMALL,
+  OSStringsSet get groups => OSStringsSet.unmodifiable(
+    OSStringsSet.fromStrings(
+      _groupGenerator(),
+      OSString.MATCH_CAPITAL | OSString.MATCH_SMALL,
+    ),
   );
 }
