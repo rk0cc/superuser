@@ -4,11 +4,10 @@
 // ignore_for_file: type=lint, unused_import
 import 'dart:ffi' as ffi;
 
-@ffi.Native<SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Bool>)>()
-external SUPERUSER_ERRORINFO is_admin_user(ffi.Pointer<ffi.Bool> result);
-
-@ffi.Native<SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Bool>)>()
-external SUPERUSER_ERRORINFO is_elevated(ffi.Pointer<ffi.Bool> result);
+@ffi.Native<SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Pointer<ffi.WChar>>)>()
+external SUPERUSER_ERRORINFO get_local_machine_name(
+  ffi.Pointer<ffi.Pointer<ffi.WChar>> result,
+);
 
 @ffi.Native<SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Pointer<ffi.WChar>>)>()
 external SUPERUSER_ERRORINFO get_current_username(
@@ -21,11 +20,17 @@ external SUPERUSER_ERRORINFO count_associated_groups_length(
 );
 
 @ffi.Native<
-  SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.WChar>>>)
+  SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Pointer<WINDOWS_GROUP_NAME>>)
 >()
 external SUPERUSER_ERRORINFO get_associated_groups(
-  ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.WChar>>> groups,
+  ffi.Pointer<ffi.Pointer<WINDOWS_GROUP_NAME>> groups,
 );
+
+@ffi.Native<SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Bool>)>()
+external SUPERUSER_ERRORINFO is_admin_user(ffi.Pointer<ffi.Bool> result);
+
+@ffi.Native<SUPERUSER_ERRORINFO Function(ffi.Pointer<ffi.Bool>)>()
+external SUPERUSER_ERRORINFO is_elevated(ffi.Pointer<ffi.Bool> result);
 
 typedef ERRCODE = ffi.UnsignedLong;
 
@@ -33,12 +38,24 @@ final class _SUPERUSER_ERRORINFO extends ffi.Struct {
   @ERRCODE()
   external int code;
 
-  @ffi.Array.multi([101])
+  @ffi.Array.multi([129])
   external ffi.Array<ffi.WChar> winapi_func_name;
 }
 
 typedef SUPERUSER_ERRORINFO = _SUPERUSER_ERRORINFO;
 
+final class _WINDOWS_GROUP_NAME extends ffi.Struct {
+  @ffi.Array.multi([257])
+  external ffi.Array<ffi.WChar> name;
+
+  @ffi.Array.multi([257])
+  external ffi.Array<ffi.WChar> domain;
+}
+
+typedef WINDOWS_GROUP_NAME = _WINDOWS_GROUP_NAME;
+
 const int MAX_USERNAME_CHAR = 257;
 
-const int WIN32API_FUNC_WLEN = 101;
+const int WIN32API_FUNC_WLEN = 129;
+
+const int NETBIOS_NAME_LEN = 16;

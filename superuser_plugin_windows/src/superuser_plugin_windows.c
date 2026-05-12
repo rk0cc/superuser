@@ -181,7 +181,7 @@ FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO get_associated_groups(WINDOWS_GROUP_NAME *
     }
 
     DWORD gpLen = _msize(*groups) / sizeof(WINDOWS_GROUP_NAME);
-    if (gpLen != gpInfo->GroupCount)
+    if (gpLen != gpInfo->GroupCount) // Reject mismatched size
     {
         HeapFree(GetProcessHeap(), 0, (LPVOID)gpInfo);
         CloseHandle(hToken);

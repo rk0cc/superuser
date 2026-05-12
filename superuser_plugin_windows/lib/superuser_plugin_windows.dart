@@ -9,7 +9,6 @@ import 'src/win_superuser.g.dart';
 
 typedef _OutWCharString = ffi.Pointer<ffi.WChar>;
 typedef _OutWCharStringPointer = ffi.Pointer<_OutWCharString>;
-typedef _OutWCharString2DPointer = ffi.Pointer<_OutWCharStringPointer>;
 
 /// Construct [SuperuserInterface] based on Windows API.
 final class WindowsSuperuser extends SuperuserPlatform {
@@ -74,6 +73,40 @@ final class WindowsSuperuser extends SuperuserPlatform {
     }
   }
 
+  OSString get _localMachineName {
+    _OutWCharString mnameBuf = calloc<ffi.WChar>(NETBIOS_NAME_LEN);
+    _OutWCharStringPointer mbPtr = calloc<_OutWCharString>()..value = mnameBuf;
+
+    try {
+      SUPERUSER_ERRORINFO errInfo = get_local_machine_name(mbPtr);
+
+      if (errInfo.code != 0) {
+        calloc.free(mnameBuf);
+
+        throw SuperuserProcessError(
+          errorCode: errInfo.code,
+          functionName: (
+            entryPoint: "_localMachineName",
+            nativeAPI: _fixedWCharArrayToString(errInfo.winapi_func_name),
+          ),
+          message: "Unable to extract local machine name.",
+        );
+      }
+    } finally {
+      calloc.free(mbPtr);
+    }
+
+    late String mname;
+
+    try {
+      mname = mnameBuf.cast<Utf16>().toDartString();
+    } finally {
+      calloc.free(mnameBuf);
+    }
+
+    return OSString.allCapital(mname);
+  }
+
   @override
   OSString get whoAmI {
     _OutWCharString unameBuf = calloc<ffi.WChar>(MAX_USERNAME_CHAR);
@@ -113,15 +146,10 @@ final class WindowsSuperuser extends SuperuserPlatform {
     ffi.Pointer<ffi.UnsignedLong> groupLengthPtr = calloc<ffi.UnsignedLong>();
     late int groupLength;
 
-    print("Running before count FFI called");
-
     try {
       SUPERUSER_ERRORINFO errInfo = count_associated_groups_length(
         groupLengthPtr,
       );
-
-      print("Running after count FFI called");
-      print("Obtained group length: ${groupLengthPtr.value}");
 
       if (errInfo.code != 0) {
         throw SuperuserProcessError(
@@ -133,56 +161,53 @@ final class WindowsSuperuser extends SuperuserPlatform {
           message: "An error occured when initializing group name extraction.",
         );
       }
-      
+
       groupLength = groupLengthPtr.value;
     } finally {
       calloc.free(groupLengthPtr);
     }
 
-    _OutWCharStringPointer groupNamesPtr = calloc<_OutWCharString>(groupLength);
-    for (int groupIndex = 0; groupIndex < groupLength; groupIndex++) {
-      groupNamesPtr[groupIndex] = calloc<ffi.WChar>(MAX_USERNAME_CHAR);
-    }
+    final OSStringsSet localDomains = OSStringsSet()
+      ..add(OSString.allCapital("BUILTIN"))
+      ..add(_localMachineName);
 
-    _OutWCharString2DPointer groupsPtr = calloc<_OutWCharStringPointer>()
-      ..value = groupNamesPtr;
+    ffi.Pointer<WINDOWS_GROUP_NAME> groupsPtr = calloc<WINDOWS_GROUP_NAME>(
+      groupLength,
+    );
+    ffi.Pointer<ffi.Pointer<WINDOWS_GROUP_NAME>> gpsEnvelopPtr =
+        calloc<ffi.Pointer<WINDOWS_GROUP_NAME>>()..value = groupsPtr;
 
     try {
-      SUPERUSER_ERRORINFO errInfo = get_associated_groups(groupsPtr);
+      SUPERUSER_ERRORINFO errInfo = get_associated_groups(gpsEnvelopPtr);
 
       if (errInfo.code != 0) {
-        for (int i = 0; i < groupLength; i++) {
-          calloc.free(groupNamesPtr[i]);
-        }
-        calloc.free(groupNamesPtr);
+        calloc.free(groupsPtr);
 
         throw SuperuserProcessError(
           errorCode: errInfo.code,
           functionName: (
-            entryPoint: "_groupsGenerator",
+            entryPoint: "_groupsGenerator()",
             nativeAPI: _fixedWCharArrayToString(errInfo.winapi_func_name),
           ),
           message: "Cannot extract groups information.",
         );
       }
     } finally {
-      calloc.free(groupsPtr);
+      calloc.free(gpsEnvelopPtr);
     }
 
-    int cursor = 0;
     try {
-      for (; cursor < groupLength; cursor++) {
-        ffi.Pointer<Utf16> groupNameStr = groupNamesPtr[cursor].cast<Utf16>();
+      for (int cursor = 0; cursor < groupLength; cursor++) {
+        WINDOWS_GROUP_NAME gp = groupsPtr[cursor];
 
-        yield groupNameStr.toDartString();
+        String domainName = _fixedWCharArrayToString(gp.domain);
 
-        calloc.free(groupNameStr);
+        if (localDomains.any((g) => g <= domainName.toUpperCase())) {
+          yield _fixedWCharArrayToString(gp.name);
+        }
       }
     } finally {
-      for (; cursor < groupLength; cursor++) {
-        calloc.free(groupNamesPtr[cursor]);
-      }
-      calloc.free(groupNamesPtr);
+      calloc.free(groupsPtr);
     }
   }
 

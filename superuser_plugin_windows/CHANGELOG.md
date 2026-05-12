@@ -1,7 +1,10 @@
 ## 4.0.0
 
 * Reimplement in Dart hook
-* Cease `netapi32` library due to failure of binding
+* Renew FFI implementions
+    * Cease `netapi32` library due to failure of binding
+    * All user information is gathered by using `Advapi32` library only
+    * Better supports when running in domain joined PC
 
 ## 3.0.0+1
 

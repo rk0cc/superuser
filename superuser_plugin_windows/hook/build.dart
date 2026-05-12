@@ -16,7 +16,8 @@ void main(List<String> args) async {
       name: "superuser_plugin_windows_$targetArchitecture",
       assetName: "src/win_superuser.g.dart",
       sources: const <String>["src/superuser_plugin_windows.c"],
-      flags: ["/std:c17", "/nologo"],
+      std: "c17",
+      flags: ["/nologo", "Advapi32.lib"],
     );
 
     await builder.run(input: input, output: output);
