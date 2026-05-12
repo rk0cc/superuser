@@ -1,3 +1,6 @@
+/// A nested library to implement [SuperuserPlatform] for Windows.
+library;
+
 import 'dart:ffi' as ffi;
 import 'dart:io';
 import 'dart:typed_data';
@@ -10,9 +13,17 @@ import 'src/win_superuser.g.dart';
 typedef _OutWCharString = ffi.Pointer<ffi.WChar>;
 typedef _OutWCharStringPointer = ffi.Pointer<_OutWCharString>;
 
-/// Construct [SuperuserInterface] based on Windows API.
+/// Enquire superuser status and user information in Windows platform.
 final class WindowsSuperuser extends SuperuserPlatform {
-  WindowsSuperuser() : assert(Platform.isWindows);
+  /// Create new instance of [WindowsSuperuser].
+  /// 
+  /// Attempt to construct it in non-Windows platform will throws
+  /// [UnsupportedError] instantly.
+  WindowsSuperuser() {
+    if (!Platform.isWindows) {
+      throw UnsupportedError("This platform only designed for Windows platform.");
+    }
+  }
 
   static String _fixedWCharArrayToString(ffi.Array<ffi.WChar> array) {
     final chars = Uint16List.fromList(array.elements);

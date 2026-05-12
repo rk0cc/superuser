@@ -1,3 +1,10 @@
+## 4.0.1
+
+* Fix concern of initializing `WindowsSuperuser` in non-Windows platforms with no
+  except thrown.
+* Add remining undocumented to boost pub score.
+* Specify eligable platforms in `pubspec.yaml`
+
 ## 4.0.0
 
 * Reimplement in Dart hook
