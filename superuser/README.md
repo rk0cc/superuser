@@ -43,7 +43,13 @@ import 'package:superuser/instance.dart';
 import 'package:superuser/mock.dart';
 
 void main() {
-    SuperuserInstance.bindInstance(const MockSuperuser(whoAmI: "hiderik", isSuperuser: true, isActivated: true));
+    SuperuserInstance.bindInstance(
+        const MockSuperuser(
+            whoAmI: "hiderik",
+            isSuperuser: true,
+            isActivated: true,
+        ),
+    );
 
     runApp(const YourApp());
 }
@@ -58,7 +64,12 @@ import 'package:superuser/mock.dart';
 
 void main() {
     // Either `yuunagit` or `YUUNAGIT` can be matched by using `OSString.<=` operation in `whoami`.
-    SuperuserInstance.bindInstance(const MockSuperuser(whoAmI: "yuunagit", matchingFlag: OSString.MATCH_CAPITAL));
+    SuperuserInstance.bindInstance(
+        const MockSuperuser(
+            whoAmI: "yuunagit",
+            matchingFlag: OSString.MATCH_CAPITAL,
+        ),
+    );
 
     runApp(const YourApp());
 }
