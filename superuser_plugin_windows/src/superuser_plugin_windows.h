@@ -16,16 +16,26 @@ extern "C"
 #define NETBIOS_NAME_LEN 16
 #define FFI_PLUGIN_EXPORT __declspec(dllexport)
 
-    // Returned value indicates the process result, which
-    // uses non-zero values to denotes problem during processing.
+    /*
+        Returned value indicates the process result, which
+        uses non-zero values to denotes problem during processing.
+    */
     typedef DWORD ERRCODE;
 
+    /*
+        Well-structured information regarding returned error
+        during function call.
+    */
     typedef struct _SUPERUSER_ERRORINFO
     {
         ERRCODE code;
         WCHAR winapi_func_name[WIN32API_FUNC_WLEN];
     } SUPERUSER_ERRORINFO;
 
+    /*
+        A model contains group information, which is a member of an user
+        who execute the program.
+    */
     typedef struct _WINDOWS_GROUP_NAME
     {
         WCHAR name[MAX_USERNAME_CHAR];
