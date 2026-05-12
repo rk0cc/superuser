@@ -1,4 +1,4 @@
 .dart_tool/
 .vscode/
-pubspec.lock
+/pubspec.lock
 .flutter-plugins*

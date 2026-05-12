@@ -3,7 +3,6 @@ publish_to: none
 environment: 
   sdk: ^3.10.0
 workspace:
-  - demo/
   - superuser/
   - superuser_interfaces/
   - superuser_plugin_unix/
