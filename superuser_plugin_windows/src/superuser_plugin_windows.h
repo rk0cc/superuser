@@ -42,7 +42,7 @@ extern "C"
     FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO count_associated_groups_length(PDWORD length);
 
     // Obtain user's associated group in local system.
-    FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO get_associated_groups(WINDOWS_GROUP_NAME *groups);
+    FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO get_associated_groups(WINDOWS_GROUP_NAME **groups);
 
     // Verify user who execute program has admin right.
     FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO is_admin_user(bool *result);
