@@ -9,7 +9,8 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.9
-  superuser: ^4.0.0
+  superuser:
+    path: ../superuser
   url_launcher: ^6.3.2
   font_awesome_flutter: ^11.0.0
 dev_dependencies:

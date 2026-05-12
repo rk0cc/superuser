@@ -63,7 +63,7 @@ class Context extends StatelessWidget {
           context: context,
           barrierDismissible: false,
           builder: (context) {
-            List<String> gpList = Superuser.groups.toList(growable: false);
+            List<OSString> gpList = Superuser.groups.toList(growable: false);
 
             return AlertDialog(
               title: const Text("Groups"),
@@ -77,7 +77,7 @@ class Context extends StatelessWidget {
                         shrinkWrap: true,
                         itemCount: gpList.length,
                         itemBuilder: (context, index) =>
-                            ListTile(title: Text(gpList[index]))))
+                            ListTile(title: Text("${gpList[index]}"))))
               ]),
               actions: <TextButton>[
                 TextButton(
@@ -107,7 +107,7 @@ class Context extends StatelessWidget {
                             Navigator.pop<void>(context);
                           })))),
           ListTile(
-              leading: const Icon(FontAwesomeIcons.github, color: Colors.black),
+              leading: const FaIcon(FontAwesomeIcons.github, color: Colors.black),
               title: const Text("GitHub repository"),
               onTap: () {
                 _launchWebsite(Uri.https("github.com", "/rk0cc/superuser"));
@@ -122,7 +122,7 @@ class Context extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 4), child: Divider()),
           ListTile(
               leading:
-                  Icon(FontAwesomeIcons.dollarSign, color: Colors.amber[400]),
+                  FaIcon(FontAwesomeIcons.dollarSign, color: Colors.amber[400]),
               title: const Text("Donate"),
               onTap: () {
                 _launchWebsite(Uri.https("github.com", "/sponsors/rk0cc"));
@@ -134,7 +134,7 @@ class Context extends StatelessWidget {
             children: <Widget>[
               ListTile(
                   title: const Text("Username", style: _titleStyle),
-                  trailing: Text(Superuser.whoAmI, style: _valueStyle)),
+                  trailing: Text("${Superuser.whoAmI}", style: _valueStyle)),
               const Divider(),
               Container(
                   decoration: BoxDecoration(
