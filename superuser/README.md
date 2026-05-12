@@ -67,7 +67,7 @@ import 'package:superuser/mock.dart';
 void main() {
     // Either `yuunagit` or `YUUNAGIT` can be matched by using `OSString.<=` operation in `whoami`.
     SuperuserInstance.bindInstance(
-        const MockSuperuser(
+        MockSuperuser(
             whoAmI: "yuunagit",
             matchingFlag: OSString.MATCH_CAPITAL,
         ),
