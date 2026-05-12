@@ -2,7 +2,6 @@
 
 #include "superuser_plugin_windows.h"
 
-#define WIN_ADMIN_PARAM L"Administrators"
 #define WINAPICALL_STATUS \
     SetLastError(0);      \
     BOOL

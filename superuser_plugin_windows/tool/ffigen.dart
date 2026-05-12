@@ -9,11 +9,20 @@ void main(List<String> args) {
     "is_admin_user",
     "is_elevated",
     "get_current_username",
+    "get_local_machine_name",
     "count_associated_groups_length",
     "get_associated_groups",
   };
-  const macroNames = <String>{"MAX_USERNAME_CHAR", "WIN32API_FUNC_WLEN"};
-  const typedefNames = <String>{"ERRCODE", "SUPERUSER_ERRORINFO"};
+  const macroNames = <String>{
+    "MAX_USERNAME_CHAR",
+    "WIN32API_FUNC_WLEN",
+    "NETBIOS_NAME_LEN",
+  };
+  const typedefNames = <String>{
+    "ERRCODE",
+    "SUPERUSER_ERRORINFO",
+    "WINDOWS_GROUP_NAME",
+  };
 
   FfiGenerator(
     output: Output(dartFile: pkgRoot.resolve("lib/src/win_superuser.g.dart")),
