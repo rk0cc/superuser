@@ -1,3 +1,7 @@
+## 4.0.2
+
+* Fix `isAdminUser` used incorrect FFI API.
+
 ## 4.0.1
 
 * Fix concern of initializing `WindowsSuperuser` in non-Windows platforms with no

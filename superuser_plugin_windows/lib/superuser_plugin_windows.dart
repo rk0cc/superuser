@@ -16,12 +16,14 @@ typedef _OutWCharStringPointer = ffi.Pointer<_OutWCharString>;
 /// Enquire superuser status and user information in Windows platform.
 final class WindowsSuperuser extends SuperuserPlatform {
   /// Create new instance of [WindowsSuperuser].
-  /// 
+  ///
   /// Attempt to construct it in non-Windows platform will throws
   /// [UnsupportedError] instantly.
   WindowsSuperuser() {
     if (!Platform.isWindows) {
-      throw UnsupportedError("This platform only designed for Windows platform.");
+      throw UnsupportedError(
+        "This platform only designed for Windows platform.",
+      );
     }
   }
 
@@ -65,7 +67,7 @@ final class WindowsSuperuser extends SuperuserPlatform {
     ffi.Pointer<ffi.Bool> result = calloc<ffi.Bool>();
 
     try {
-      SUPERUSER_ERRORINFO errInfo = is_elevated(result);
+      SUPERUSER_ERRORINFO errInfo = is_admin_user(result);
 
       if (errInfo.code != 0) {
         throw SuperuserProcessError(

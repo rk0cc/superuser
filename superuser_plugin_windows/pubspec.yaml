@@ -1,6 +1,6 @@
 name: superuser_plugin_windows
 description: "Detect, verify user who execute Dart program has superuser role in Windows"
-version: 4.0.1
+version: 4.0.2
 homepage: https://github.com/rk0cc/superuser
 repository: https://github.com/rk0cc/superuser/tree/current/superuser_plugin_windows
 environment:
