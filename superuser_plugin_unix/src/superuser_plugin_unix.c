@@ -21,31 +21,40 @@
 #endif
 #endif
 
-typedef enum _error_causes
-{
-    pwuid_err = 1,
-    grnam_err,
-    grouplist_err,
-    grgid_err
-} error_causes;
-
-static ERRCODE __build_suunix_error_code(error_causes causes, int error_code)
-{
-    return (causes << 16) | error_code;
-}
-
 // Common method to obtain current user structure.
-void __get_current_user_info(struct passwd **pw)
+void __get_current_user_info(SUPERUSER_ERRINFO *errinfo, struct passwd **pw)
 {
     uid_t uid = geteuid();
-    *pw = getpwuid(uid);
+    struct passwd *tmpPw;
+
+    errno = 0;
+    tmpPw = getpwuid(uid);
+
+    if (tmpPw == NULL)
+    {
+        errinfo->code = errno;
+        strncpy(errinfo->unixapi_func_name, "getpwuid (__get_current_user_info)", MAX_UNIX_FUNCNAME_LEN - 1);
+
+        return;
+    }
+
+    *pw = tmpPw;
 }
 
-void __get_pw_groups(struct passwd *pw, int *length, gid_t **groups)
+void __get_pw_groups(SUPERUSER_ERRINFO *errinfo, struct passwd *pw, int *length, gid_t **groups)
 {
     int ngps;
     long max_ngps = sysconf(_SC_NGROUPS_MAX) + 1;
+
+    errno = 0;
     gid_t *tmp_groups = (gid_t *)calloc(max_ngps, sizeof(gid_t));
+    if (tmp_groups == NULL)
+    {
+        errinfo->code = errno;
+        strncpy(errinfo->unixapi_func_name, "calloc (__get_pw_groups)", MAX_UNIX_FUNCNAME_LEN - 1);
+
+        return;
+    }
 
     ngps = getgroups(max_ngps, tmp_groups);
 
@@ -61,58 +70,65 @@ int __sort_search_gid_compare(const void *a, const void *b)
 }
 
 // Obtain name of user.
-FFI_PLUGIN_EXPORT ERRCODE get_uname(char **result)
+FFI_PLUGIN_EXPORT SUPERUSER_ERRINFO get_uname(char **result)
 {
+    SUPERUSER_ERRINFO errinfo = {0};
+
     struct passwd *pw;
-    errno = 0;
-    __get_current_user_info(&pw);
+    __get_current_user_info(&errinfo, &pw);
 
-    if (!pw)
-        return __build_suunix_error_code(pwuid_err, errno);
+    if (errinfo.code == 0)
+        *result = pw->pw_name;
 
-    char *username = pw->pw_name;
-    *result = username;
-
-    return 0;
+    return errinfo;
 }
 
 // Obtain all associated group for current user.
-FFI_PLUGIN_EXPORT ERRCODE get_current_user_group(int *size, gid_t **groups)
+FFI_PLUGIN_EXPORT SUPERUSER_ERRINFO get_current_user_group(int *size, gid_t **groups)
 {
+    SUPERUSER_ERRINFO errinfo = {0};
+
     struct passwd *pw;
     errno = 0;
-    __get_current_user_info(&pw);
+    __get_current_user_info(&errinfo, &pw);
 
-    if (!pw)
-        return __build_suunix_error_code(pwuid_err, errno);
+    if (errinfo.code != 0)
+        return errinfo;
 
     int ngps;
     gid_t *gp_lists;
     errno = 0;
-    __get_pw_groups(pw, &ngps, &gp_lists);
-    if (ngps == -1 || errno > 0)
+    __get_pw_groups(&errinfo, pw, &ngps, &gp_lists);
+    if (ngps == -1 || errinfo.code != 0)
     {
         free(gp_lists);
-        return __build_suunix_error_code(grouplist_err, errno);
+        return errinfo;
     }
 
     *size = ngps;
     *groups = gp_lists;
 
-    return 0;
+    return errinfo;
 }
 
 // Resolve name of group from given ID number.
-FFI_PLUGIN_EXPORT ERRCODE get_group_name_by_gid(gid_t group_id, char **result)
+FFI_PLUGIN_EXPORT SUPERUSER_ERRINFO get_group_name_by_gid(gid_t group_id, char **result)
 {
+    SUPERUSER_ERRINFO errinfo = {0};
+
     errno = 0;
     struct group *gp = getgrgid(group_id);
     if (!gp)
-        return __build_suunix_error_code(grgid_err, errno);
+    {
+        errinfo.code = errno;
+        strncpy(errinfo.unixapi_func_name, "getgrgid (get_group_name_by_gid)", MAX_UNIX_FUNCNAME_LEN - 1);
 
+        return errinfo;
+    }
+    
     *result = gp->gr_name;
 
-    return 0;
+    return errinfo;
 }
 
 // Determine user who execute this program is root.
@@ -126,25 +142,31 @@ FFI_PLUGIN_EXPORT bool is_root()
 //
 // This method requires sudo bundled in OS already. Normally, majority of UNIX or liked
 // system.
-FFI_PLUGIN_EXPORT ERRCODE is_sudo_group(bool *result)
+FFI_PLUGIN_EXPORT SUPERUSER_ERRINFO is_sudo_group(bool *result)
 {
-    char *sudo_gpname = DEFAULT_UNIX_SUDO_GP;
+    SUPERUSER_ERRINFO errinfo = {0};
+
     struct group *gp;
 
     errno = 0;
-    gp = getgrnam(sudo_gpname);
+    gp = getgrnam(DEFAULT_UNIX_SUDO_GP);
     if (!gp)
-        return errno > 0 ? __build_suunix_error_code(grnam_err, errno) : 0;
+    {
+        errinfo.code = errno;
+        strncpy(errinfo.unixapi_func_name, "getgrnam (is_sudo_groups)", MAX_UNIX_FUNCNAME_LEN - 1);
+
+        return errinfo;
+    }
 
     // As key of bsearch
     gid_t sudo_gpid = gp->gr_gid;
 
     gid_t *gp_lists;
     int ngps;
-    ERRCODE gp_list_err = get_current_user_group(&ngps, &gp_lists);
-
-    if (gp_list_err > 0)
-        return gp_list_err;
+    
+    errinfo = get_current_user_group(&ngps, &gp_lists);
+    if (errinfo.code != 0)
+        return errinfo;
 
     qsort(gp_lists, ngps, sizeof(gid_t), __sort_search_gid_compare);
     gid_t *found = (gid_t *)bsearch(&sudo_gpid, gp_lists, ngps, sizeof(gid_t), __sort_search_gid_compare);
@@ -153,7 +175,7 @@ FFI_PLUGIN_EXPORT ERRCODE is_sudo_group(bool *result)
 
     free(gp_lists);
 
-    return 0;
+    return errinfo;
 }
 
 // Flush dynamic allocated group pointers.

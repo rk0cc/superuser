@@ -1,34 +1,40 @@
-import 'dart:ffi';
-import 'dart:io';
+/// [SuperuserPlatform] in UNIX implementations.
+library;
 
-import 'package:ffi/ffi.dart' as ffi;
+import 'dart:convert';
+import 'dart:ffi' as ffi;
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:ffi/ffi.dart';
 import 'package:superuser_interfaces/superuser_interfaces.dart';
 
-import 'superuser_plugin_unix_bindings_generated.dart';
-
-const String _libName = 'superuser_plugin_unix';
+import 'src/unix_superuser.g.dart';
 
 /// Define [SuperuserInterface] under UNIX environment.
 ///
 /// Remark: [isActivated] is identical with [isSuperuser]
 /// since `root` is a definition of superuser.
 final class UnixSuperuser extends SuperuserPlatform {
-  UnixSuperuser()
-    : super(() {
-        if (Platform.isMacOS) {
-          return DynamicLibrary.open('$_libName.framework/$_libName');
-        }
+  UnixSuperuser() {
+    if (!(Platform.isLinux || Platform.isMacOS)) {
+      throw UnsupportedError("");
+    }
+  }
 
-        if (Platform.isLinux) {
-          return DynamicLibrary.open('lib$_libName.so');
-        }
+  static String _fixedCharArrayToString(ffi.Array<ffi.Char> array) {
+    final chars = Uint8List.fromList(array.elements);
+    final nullIndex = chars.indexWhere((c) => c == 0);
 
-        throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
-      });
+    if (nullIndex == -1) {
+      throw RangeError("Null terminated does not exist in character array.");
+    }
+
+    return utf8.decode(chars.sublist(0, nullIndex + 1));
+  }
 
   @override
-  bool get isActivated =>
-      onGettingProperties((lib) => SuperuserPluginUnixBindings(lib).is_root());
+  bool get isActivated => is_root();
 
   @override
   bool get isSuperuser {
@@ -36,97 +42,113 @@ final class UnixSuperuser extends SuperuserPlatform {
       return true;
     }
 
-    return onGettingProperties((lib) {
-      final SuperuserPluginUnixBindings bindings = SuperuserPluginUnixBindings(
-        lib,
-      );
+    ffi.Pointer<ffi.Bool> result = calloc<ffi.Bool>();
 
-      Pointer<Bool> result = ffi.calloc<Bool>();
+    try {
+      SUPERUSER_ERRINFO errInfo = is_sudo_group(result);
 
-      try {
-        int errCode = bindings.is_sudo_group(result);
-
-        if (errCode > 0) {
-          throw SuperuserProcessError(
-            errCode,
-            "Unable to retrive group information.",
-          );
-        }
-
-        return result.value;
-      } finally {
-        ffi.calloc.free(result);
+      if (errInfo.code != 0) {
+        throw SuperuserProcessError(
+          errorCode: errInfo.code,
+          functionName: (
+            entryPoint: "isSuperuser",
+            nativeAPI: _fixedCharArrayToString(errInfo.unixapi_func_name),
+          ),
+          message: "Unable to retrive group information.",
+        );
       }
-    });
+
+      return result.value;
+    } finally {
+      calloc.free(result);
+    }
   }
 
   @override
-  String get whoAmI => onGettingProperties((lib) {
-    final SuperuserPluginUnixBindings bindings = SuperuserPluginUnixBindings(
-      lib,
-    );
-
-    Pointer<Pointer<Char>> resultPtr = ffi.calloc<Pointer<Char>>();
+  OSString get whoAmI {
+    ffi.Pointer<ffi.Pointer<ffi.Char>> resultPtr =
+        calloc<ffi.Pointer<ffi.Char>>();
 
     try {
-      int errCode = bindings.get_uname(resultPtr);
+      SUPERUSER_ERRINFO errInfo = get_uname(resultPtr);
 
-      if (errCode > 0) {
-        throw SuperuserProcessError(errCode, "Unable to retrive username.");
+      if (errInfo.code > 0) {
+        throw SuperuserProcessError(
+          errorCode: errInfo.code,
+          functionName: (
+            entryPoint: "whoAmI",
+            nativeAPI: _fixedCharArrayToString(errInfo.unixapi_func_name),
+          ),
+          message: "Unable to retrive username.",
+        );
       }
 
-      String result = resultPtr.value.cast<ffi.Utf8>().toDartString();
-
-      return result;
+      return OSString.caseSensitive(
+        resultPtr.value.cast<Utf8>().toDartString(),
+      );
     } finally {
-      ffi.calloc.free(resultPtr);
+      calloc.free(resultPtr);
     }
-  });
+  }
 
-  @override
-  Iterable<String> get groups => onGettingProperties((lib) sync* {
-    final SuperuserPluginUnixBindings bindings = SuperuserPluginUnixBindings(
-      lib,
-    );
+  Iterable<String> _groupGenerator() sync* {
+    ffi.Pointer<ffi.Pointer<gid_t>> gps = calloc<ffi.Pointer<gid_t>>();
+    ffi.Pointer<ffi.Int> size = calloc<ffi.Int>();
 
-    Pointer<Pointer<gid_t>> gps = ffi.calloc<Pointer<gid_t>>();
-    Pointer<Int> size = ffi.calloc<Int>();
-
-    late Pointer<gid_t> gids;
+    late ffi.Pointer<gid_t> gids;
     late int gpSize;
 
     try {
-      int errCode = bindings.get_current_user_group(size, gps);
-      if (errCode > 0) {
+      SUPERUSER_ERRINFO errInfo = get_current_user_group(size, gps);
+      if (errInfo.code > 0) {
         throw SuperuserProcessError(
-          errCode,
-          "Unable to obtain current user's associated groups.",
+          errorCode: errInfo.code,
+          functionName: (
+            entryPoint: "_groupGenerator",
+            nativeAPI: _fixedCharArrayToString(errInfo.unixapi_func_name),
+          ),
+          message: "Unable to obtain current user's associated groups.",
         );
       }
 
       gids = gps.value;
       gpSize = size.value;
     } finally {
-      [gps, size].forEach(ffi.calloc.free);
+      [gps, size].forEach(calloc.free);
     }
 
-    Pointer<Pointer<Char>> gpNamePtr = ffi.calloc<Pointer<Char>>();
+    ffi.Pointer<ffi.Pointer<ffi.Char>> gpNamePtr =
+        calloc<ffi.Pointer<ffi.Char>>();
 
     try {
       for (int i = 0; i < gpSize; i++) {
-        int nameErrCode = bindings.get_group_name_by_gid(gids[i], gpNamePtr);
-        if (nameErrCode > 0) {
+        SUPERUSER_ERRINFO nameErrInfo = get_group_name_by_gid(
+          gids[i],
+          gpNamePtr,
+        );
+
+        if (nameErrInfo.code != 0) {
           throw SuperuserProcessError(
-            nameErrCode,
-            "Failed to list group name.",
+            errorCode: nameErrInfo.code,
+            functionName: (
+              entryPoint: "_groupGenerator",
+              nativeAPI: _fixedCharArrayToString(nameErrInfo.unixapi_func_name),
+            ),
+            message: "Failed to list group name.",
           );
         }
 
-        yield gpNamePtr.value.cast<ffi.Utf8>().toDartString();
+        yield gpNamePtr.value.cast<Utf8>().toDartString();
       }
     } finally {
-      ffi.calloc.free(gpNamePtr);
-      bindings.flush_group(gids);
+      calloc.free(gpNamePtr);
+      flush_group(gids);
     }
-  });
+  }
+
+  @override
+  OSStringsSet get groups => OSStringsSet.fromStrings(
+    _groupGenerator(),
+    OSString.MATCH_CAPITAL | OSString.MATCH_SMALL,
+  );
 }

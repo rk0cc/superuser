@@ -1,3 +1,7 @@
+## 4.0.0
+
+* Dart hook based implementations
+
 ## 3.0.0+1
 
 * Fix Flutter and Dart SDK version unaligned problem.

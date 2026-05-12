@@ -8,9 +8,16 @@ environment:
 resolution: workspace
 dependencies:
   ffi: ^2.2.0
+  hooks: ^1.0.0
+  native_toolchain_c: ">=0.17.6 <1.0.0"
+  native_toolchain_cmake: ">=0.2.5 <1.0.0"
+  code_assets: ^1.0.0
   superuser_interfaces: ^4.0.0
 dev_dependencies:
   ffigen: ^20.1.1
   lints: ^6.0.0
 hook:
   build: true
+platforms:
+  macos:
+  linux:
