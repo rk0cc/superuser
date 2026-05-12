@@ -6,4 +6,4 @@ import 'package:superuser_interfaces/superuser_interfaces.dart'
     show SuperuserInterface;
 
 export 'package:superuser_interfaces/superuser_interfaces.dart'
-    show MockSuperuser;
+    show MockSuperuser, OSString, OSStringsSet;

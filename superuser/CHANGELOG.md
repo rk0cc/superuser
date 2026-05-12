@@ -1,3 +1,13 @@
+## 4.0.0
+
+* Dark hook FFI implementation
+    * Minmum Dart SDK becomes `^3.10.0`
+    * Cease Flutter dependencies
+* New `SuperuserProcessError` structure with enhanced readability.
+* New string wrapper: `OSString`
+    * Compare string depending on applied staregy in the platform.
+* New collection: `OSStringSet`
+
 ## 3.0.0+1
 
 * Fix Flutter and Dart SDK version unaligned problem.

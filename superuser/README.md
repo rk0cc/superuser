@@ -8,8 +8,8 @@ Instead, `superuser` package offers superuser detection in Flutter desktop and t
 
 ## Limitations
 
-This package only tested using informations given on **local machines** only. It may not perform identically if running devices
-is domain joined.
+This package only tested using informations given on **local machines** only. Although it can run in domain joined machine since `4.0.0`,
+only local scope can be extracted that any entities related with Activity Directory or LDAP are omitted.
 
 ## Implementations
 
@@ -48,6 +48,23 @@ void main() {
     runApp(const YourApp());
 }
 ```
+
+To alter string detection staregy, it is possible to achieve by applying `matchingFlag`:
+
+```dart
+import 'package:flutter/widgets.dart';
+import 'package:superuser/instance.dart';
+import 'package:superuser/mock.dart';
+
+void main() {
+    // Either `yuunagit` or `YUUNAGIT` can be matched by using `OSString.<=` operation in `whoami`.
+    SuperuserInstance.bindInstance(const MockSuperuser(whoAmI: "yuunagit", matchingFlag: OSString.MATCH_CAPITAL));
+
+    runApp(const YourApp());
+}
+```
+
+Value of `matchingFlag` has been mentioned in [OSString's constructor method](https://pub.dev/documentation/superuser_interfaces/latest/interfaces/OSString/OSString.html) already.
 
 ## Demo
 

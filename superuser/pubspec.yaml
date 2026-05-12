@@ -17,8 +17,8 @@ resolution: workspace
 dependencies:
   meta: ^1.17.0
   superuser_interfaces: ^4.0.0
-  superuser_plugin_unix: ^4.0.0
-  superuser_plugin_windows: ^4.0.0
+  superuser_plugin_unix: ^4.0.1
+  superuser_plugin_windows: ^4.0.1
 dev_dependencies:
   lints: ^6.0.0
 platforms:

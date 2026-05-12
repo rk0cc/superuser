@@ -4,15 +4,14 @@
 /// as well as username who run current Flutter program.
 library superuser;
 
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:superuser_interfaces/superuser_interfaces.dart'
-    show MockSuperuser;
+    show MockSuperuser, OSString, OSStringsSet;
 
 import 'src/instance.dart';
 import 'src/exception.dart';
 
 export 'package:superuser_interfaces/superuser_interfaces.dart'
-    show SuperuserProcessError;
+    show SuperuserProcessError, OSString, OSStringsSet;
 
 export 'src/exception.dart';
 
@@ -52,8 +51,8 @@ abstract final class Superuser {
   static bool get isActivated => instance.isActivated;
 
   /// Obtain username who call current program.
-  static String get whoAmI => instance.whoAmI;
+  static OSString get whoAmI => instance.whoAmI;
 
   /// Obtain user's associated groups in local system.
-  static Set<String> get groups => Set.unmodifiable(instance.groups);
+  static OSStringsSet get groups => instance.groups;
 }

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:superuser_interfaces/superuser_interfaces.dart';
 import 'package:superuser_plugin_unix/superuser_plugin_unix.dart';
@@ -19,9 +18,7 @@ SuperuserInterface? _instance;
 /// as current instance.
 @internal
 SuperuserInterface get instance {
-  if (_instance == null ||
-      _instance is SuperuserPlatform &&
-          (_instance as SuperuserPlatform).isClosed) {
+  if (_instance == null) {
     SuperuserInstance.bindInstance(null);
   }
 
@@ -72,12 +69,6 @@ abstract final class SuperuserInstance {
         newInst = UnixSuperuser();
       }
     } else {
-      if (suInterface is SuperuserPlatform && suInterface.isClosed) {
-        throw ArgumentError(
-            "The provided interface should not be closed already.",
-            "suInterface");
-      }
-
       newInst = suInterface;
     }
 
@@ -85,12 +76,9 @@ abstract final class SuperuserInstance {
   }
 
   /// Flush existed [SuperuserInterface] instance.
+  @Deprecated("This features is no longer required for Dart hook implementation.")
   static void flushInstance() {
     if (_instance != null) {
-      if (_instance is SuperuserPlatform) {
-        (_instance as SuperuserPlatform).close();
-      }
-
       _instance = null;
     }
   }
