@@ -21,7 +21,7 @@ void main(List<String> args) async {
       assetName: "src/unix_superuser.g.dart",
       sources: const <String>["src/superuser_plugin_unix.c"],
       defines: <String, String?>{
-        if (await isDebian) "DEFAULT_UNIX_SUDO_GP": "sudo",
+        if (await isDebian) "DEFAULT_UNIX_SUDO_GP": "\"sudo\"",
       },
       std: "c17",
     );
