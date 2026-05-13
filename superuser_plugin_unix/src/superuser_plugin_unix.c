@@ -12,12 +12,8 @@
 #ifndef DEFAULT_UNIX_SUDO_GP
 #if defined(__APPLE__) && defined(__MACH__)
 #define DEFAULT_UNIX_SUDO_GP "admin"
-#elif defined(__linux__)
-#define DEFAULT_UNIX_SUDO_GP "sudo"
-#elif defined(__FreeBSD__)
-#define DEFAULT_UNIX_SUDO_GP "wheel"
 #else
-#define DEFAULT_UNIX_SUDO_GP ""
+#define DEFAULT_UNIX_SUDO_GP "wheel"
 #endif
 #endif
 

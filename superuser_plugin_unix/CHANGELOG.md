@@ -1,3 +1,8 @@
+## 4.1.1
+
+* Fix wrongfully assume `sudo` as sudoers across all Linux distros rather than Debian-based only
+* Default sudoer group is `wheel` instead
+
 ## 4.1.0
 
 * Fix wrong year range of license
