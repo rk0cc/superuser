@@ -33,7 +33,7 @@ jobs:
       - name: Upload build
         uses: actions/upload-artifact@v7
         with:
-          name: superuser_demo_windows_${{ matrix.winarch }}
+          name: superuser_demo_windows_${{ runner.arch }}
           path: demo/build/windows/x64/runner/Release/
   build_linux:
     name: Linux build
@@ -65,5 +65,5 @@ jobs:
       - name: Upload build
         uses: actions/upload-artifact@v7
         with:
-          name: superuser_demo_linux_${{ matrix.ubuntuarch }}
+          name: superuser_demo_linux_${{ runner.arch }}
           path: demo/build/linux/x64/release/bundle/
