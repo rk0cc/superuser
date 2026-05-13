@@ -15,7 +15,15 @@ only local scope can be extracted that any entities related with Activity Direct
 
 ### Production
 
-No additional setup needed.
+`lld` must be installed in the Linux already before build:
+
+```bash
+# Debian based
+sudo apt intall lld
+
+# Fedora based
+sudo dnf install lld
+```
 
 ### Testing or simulating with mock interface
 
