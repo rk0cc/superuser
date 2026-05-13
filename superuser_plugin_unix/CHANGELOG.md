@@ -1,3 +1,7 @@
+## 4.1.2
+
+* Detecting Debian distro should be handled by FFI itself rather than compile time.
+
 ## 4.1.1
 
 * Fix wrongfully assume `sudo` as sudoers across all Linux distros rather than Debian-based only

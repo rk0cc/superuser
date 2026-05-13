@@ -313,7 +313,7 @@ packages:
       path: "../superuser_plugin_unix"
       relative: true
     source: path
-    version: "4.1.1"
+    version: "4.1.2"
   superuser_plugin_windows:
     dependency: "direct overridden"
     description:

@@ -17,6 +17,14 @@
 #endif
 #endif
 
+void __get_sudo_group_name(char *sudo_gp_name)
+{
+    if (access("/etc/debian_version", F_OK) != -1)
+        strncpy(sudo_gp_name, "sudo", 5); // Debian based uses `sudo` as sudoer group name
+    else
+        strncpy(sudo_gp_name, DEFAULT_UNIX_SUDO_GP, 6); // Uses traditional name for majority OSes
+}
+
 // Common method to obtain current user structure.
 void __get_current_user_info(SUPERUSER_ERRINFO *errinfo, struct passwd **pw)
 {
@@ -121,7 +129,7 @@ FFI_PLUGIN_EXPORT SUPERUSER_ERRINFO get_group_name_by_gid(gid_t group_id, char *
 
         return errinfo;
     }
-    
+
     *result = gp->gr_name;
 
     return errinfo;
@@ -142,10 +150,13 @@ FFI_PLUGIN_EXPORT SUPERUSER_ERRINFO is_sudo_group(bool *result)
 {
     SUPERUSER_ERRINFO errinfo = {0};
 
+    char gpName[6];
+    __get_sudo_group_name(gpName);
+
     struct group *gp;
 
     errno = 0;
-    gp = getgrnam(DEFAULT_UNIX_SUDO_GP);
+    gp = getgrnam(gpName);
     if (!gp)
     {
         errinfo.code = errno;
@@ -159,7 +170,7 @@ FFI_PLUGIN_EXPORT SUPERUSER_ERRINFO is_sudo_group(bool *result)
 
     gid_t *gp_lists;
     int ngps;
-    
+
     errinfo = get_current_user_group(&ngps, &gp_lists);
     if (errinfo.code != 0)
         return errinfo;
