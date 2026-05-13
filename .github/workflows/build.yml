@@ -7,7 +7,13 @@ on:
 jobs:
   build_win:
     name: Windows build
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        winarch:
+          - windows-latest
+          - windows-11-arm
+    runs-on: ${{ matrix.winarch }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -27,11 +33,17 @@ jobs:
       - name: Upload build
         uses: actions/upload-artifact@v7
         with:
-          name: superuser_demo_windows
+          name: superuser_demo_windows_${{ matrix.winarch }}
           path: demo/build/windows/x64/runner/Release/
   build_linux:
     name: Linux build
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntuarch:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.ubuntuarch }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -53,5 +65,5 @@ jobs:
       - name: Upload build
         uses: actions/upload-artifact@v7
         with:
-          name: superuser_demo_linux
+          name: superuser_demo_linux_${{ matrix.ubuntuarch }}
           path: demo/build/linux/x64/release/bundle/

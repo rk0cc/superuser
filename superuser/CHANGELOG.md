@@ -1,3 +1,10 @@
+## 4.1.1
+
+* Fix wrongfully assume `sudo` as sudoer group for all Linux.
+    * `sudo` group is for Debian-based only, other distros uses `wheel` instead.
+* Update `README.md` with emphasise Dart CLI support.
+* ARM64 demo app shipped in Windows and Linux.
+
 ## 4.1.0
 
 * Ditch instance construction guarding into `interface` module
