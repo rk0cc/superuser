@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'execution.dart';
 import 'os_string.dart';
 
 /// Shared interface for evaluating superuser status when
@@ -43,8 +42,7 @@ abstract base class SuperuserPlatform implements SuperuserInterface {
   /// [UnsupportedError] throw if attempted to construst
   /// in testing.
   SuperuserPlatform() {
-    if (Platform.environment.containsKey("FLUTTER_TEST") ||
-        Platform.script.path.contains("dart_test")) {
+    if (isTesting) {
       throw UnsupportedError(
         "Using real superuser result to run test is forbidden.",
       );
@@ -76,7 +74,7 @@ final class MockSuperuser implements SuperuserInterface {
 
   /// Create mocked properties of [SuperuserInterface] to emulate
   /// superuser status.
-  /// 
+  ///
   /// [whoAmI] and [groups] will be applied the same [OSString]
   /// matching method by configuring [matchingFlag], which has been
   /// instructed in [OSString.new] already.
@@ -87,5 +85,9 @@ final class MockSuperuser implements SuperuserInterface {
     Set<String> groups = const {},
     int matchingFlag = OSString.DEFAULT_MATCH,
   }) : whoAmI = OSString(whoAmI, matchingFlag),
-       groups = OSStringsSet.fromStrings(groups, matchingFlag);
+       groups = OSStringsSet.fromStrings(groups, matchingFlag) {
+    if (isProduction) {
+      throw UnsupportedError("Do not uses mock instance in production state.");
+    }
+  }
 }

@@ -1,3 +1,9 @@
+## 4.1.0
+
+* Enforce platform detection in interface library
+* Fix incorrect year range of license
+* Update description
+
 ## 4.0.0
 
 * New type: `OSString` and `OSStringsSet`

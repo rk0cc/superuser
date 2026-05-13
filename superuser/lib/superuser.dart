@@ -8,12 +8,9 @@ import 'package:superuser_interfaces/superuser_interfaces.dart'
     show MockSuperuser, OSString, OSStringsSet;
 
 import 'src/instance.dart';
-import 'src/exception.dart';
 
 export 'package:superuser_interfaces/superuser_interfaces.dart'
     show SuperuserProcessError, OSString, OSStringsSet;
-
-export 'src/exception.dart';
 
 /// A wrapper class that extract status of superuser as well as username.
 ///

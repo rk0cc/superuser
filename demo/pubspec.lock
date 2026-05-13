@@ -299,31 +299,28 @@ packages:
       path: "../superuser"
       relative: true
     source: path
-    version: "4.0.0"
+    version: "4.1.0"
   superuser_interfaces:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: superuser_interfaces
-      sha256: ebdd9c945912cb795b30fac0ae75abdf6da1b53550074fd19019f1f0a840584d
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.0"
+      path: "../superuser_interfaces"
+      relative: true
+    source: path
+    version: "4.1.0"
   superuser_plugin_unix:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: superuser_plugin_unix
-      sha256: f6c65697330e7207df79d8dcfdfa17b6f358dedd3cd7ef22b4565186f1b43182
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.1"
+      path: "../superuser_plugin_unix"
+      relative: true
+    source: path
+    version: "4.1.0"
   superuser_plugin_windows:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: superuser_plugin_windows
-      sha256: d578600735bc74f06e09aaaadfe25e241dcf7f0c09e0537364cb6fd00f74fcf1
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.2"
+      path: "../superuser_plugin_windows"
+      relative: true
+    source: path
+    version: "4.1.0"
   term_glyph:
     dependency: transitive
     description:

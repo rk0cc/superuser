@@ -5,9 +5,6 @@ import 'package:superuser_interfaces/superuser_interfaces.dart';
 import 'package:superuser_plugin_unix/superuser_plugin_unix.dart';
 import 'package:superuser_plugin_windows/superuser_plugin_windows.dart';
 
-import 'exception.dart';
-import 'utils.dart';
-
 SuperuserInterface? _instance;
 
 /// Retrive current instance of [SuperuserInterface].
@@ -34,32 +31,20 @@ abstract final class SuperuserInstance {
   /// property.
   ///
   /// If [suInterface] is `null`, it binds platform specified
-  /// [SuperuserInterface] automatically.
+  /// [SuperuserInterface] automatically if the platform is either
+  /// Windows, macOS or Linux.
   ///
-  /// When this invoked in neither Windows, macOS or Linux platform,
-  /// it throws [UnsupportedError].
+  /// It is possible (but rarely) to attach customized [SuperuserPlatform]
+  /// if necessary.
   ///
-  /// If [suInterface] is a member of [SuperuserPlatform],
-  /// the provided interface should not be closed. Otherwise,
-  /// it throws [ArgumentError].
-  ///
-  /// [suInterface] can only accept [MockSuperuser] if [kDebugMode]
-  /// or it performs widget testing. Using mock interface in
-  /// [kReleaseMode] or [kProfileMode] causes [IllegalInstanceError]
-  /// throw.
+  /// When [suInterface] is [SuperuserPlatform] (i.e [WindowsSuperuser]
+  /// or [UnixSuperuser]), it cannot be constructed when testing as well
+  /// as comply it's target platform that [UnsupportedError] will be thrown
+  /// if violated. [MockSuperuser] can only be assigned when running in debug
+  /// mode or during test that [UnsupportedError] also will be thrown if unsatified.
+  /// In another word, only running program in debug mode can freely attach whatever
+  /// [SuperuserInterface] implementation is used.
   static void bindInstance(SuperuserInterface? suInterface) {
-    if (!Platform.isWindows && !Platform.isMacOS && !Platform.isLinux) {
-      throw UnsupportedError("Unknown platform");
-    }
-
-    if (!kUnderDevelop && suInterface is MockSuperuser) {
-      throw IllegalInstanceError(
-        "Mock instance cannot be used in release mode.",
-      );
-    }
-
-    flushInstance();
-
     late SuperuserInterface newInst;
 
     if (suInterface == null) {

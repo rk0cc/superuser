@@ -1,3 +1,10 @@
+## 4.1.0
+
+* Ditch instance construction guarding into `interface` module
+* Fix incorrect year range of license
+* Uses group label detection to filter eligable groups in Windows platform
+* Apply new line format with correction in `README.md`
+
 ## 4.0.0
 
 * Dark hook FFI implementation

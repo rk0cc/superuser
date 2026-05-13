@@ -1,4 +1,4 @@
-/// [SuperuserPlatform] in UNIX implementations.
+/// [SuperuserPlatform] in UNIX (POSIX) implementations.
 library;
 
 import 'dart:convert';
@@ -11,14 +11,17 @@ import 'package:superuser_interfaces/superuser_interfaces.dart';
 
 import 'src/unix_superuser.g.dart';
 
-/// Define [SuperuserInterface] under UNIX environment.
+/// Define [SuperuserInterface] under UNIX environment with POSIX C
+/// API implementation.
 ///
 /// Remark: [isActivated] is identical with [isSuperuser]
 /// since `root` is a definition of superuser.
 final class UnixSuperuser extends SuperuserPlatform {
   UnixSuperuser() {
     if (!(Platform.isLinux || Platform.isMacOS)) {
-      throw UnsupportedError("");
+      throw UnsupportedError(
+        "This platform only designed for UNIX (POSIX) platform.",
+      );
     }
   }
 

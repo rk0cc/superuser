@@ -155,7 +155,7 @@ final class WindowsSuperuser extends SuperuserPlatform {
     return OSString.allCapital(uname);
   }
 
-  Iterable<String> _groupsGenetator() sync* {
+  Iterable<String> _groupsGenetator({bool includeDomain = false}) sync* {
     ffi.Pointer<ffi.UnsignedLong> groupLengthPtr = calloc<ffi.UnsignedLong>();
     late int groupLength;
 
@@ -180,8 +180,8 @@ final class WindowsSuperuser extends SuperuserPlatform {
       calloc.free(groupLengthPtr);
     }
 
-    final OSStringsSet localDomains = OSStringsSet()
-      ..add(OSString.allCapital("BUILTIN"))
+    final OSStringsSet implyDomains = OSStringsSet()
+      ..add(const OSString.allCapital("BUILTIN"))
       ..add(_localMachineName);
 
     ffi.Pointer<WINDOWS_GROUP_NAME> groupsPtr = calloc<WINDOWS_GROUP_NAME>(
@@ -199,7 +199,7 @@ final class WindowsSuperuser extends SuperuserPlatform {
         throw SuperuserProcessError(
           errorCode: errInfo.code,
           functionName: (
-            entryPoint: "_groupsGenerator()",
+            entryPoint: "_groupsGenerator",
             nativeAPI: _fixedWCharArrayToString(errInfo.winapi_func_name),
           ),
           message: "Cannot extract groups information.",
@@ -213,10 +213,27 @@ final class WindowsSuperuser extends SuperuserPlatform {
       for (int cursor = 0; cursor < groupLength; cursor++) {
         WINDOWS_GROUP_NAME gp = groupsPtr[cursor];
 
-        String domainName = _fixedWCharArrayToString(gp.domain);
+        bool isPromoted = <int>[
+          SID_NAME_USE.SidTypeAlias,
+          if (includeDomain) SID_NAME_USE.SidTypeGroup,
+        ].any((snu) => snu == gp.group_type);
 
-        if (localDomains.any((g) => g <= domainName.toUpperCase())) {
-          yield _fixedWCharArrayToString(gp.name);
+        if (isPromoted) {
+          StringBuffer buf = StringBuffer();
+
+          String domainStr = _fixedWCharArrayToString(gp.domain);
+
+          // Domain part is hidden if related with `BUILTIN` and name of local domain.
+          if (includeDomain &&
+              !implyDomains.containsByString(domainStr.toUpperCase())) {
+            buf
+              ..write(domainStr)
+              ..write("\\");
+          }
+
+          buf.write(_fixedWCharArrayToString(gp.name));
+
+          yield buf.toString();
         }
       }
     } finally {

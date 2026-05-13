@@ -1,3 +1,8 @@
+## 4.1.0
+
+* Fix wrong year range of license
+* Add missing message when throwing `UnsupportedError`
+
 ## 4.0.1
 
 * Fix `groups` returns mutable set that it suppose should be unmodifiable.

@@ -236,6 +236,8 @@ FFI_PLUGIN_EXPORT SUPERUSER_ERRORINFO get_associated_groups(WINDOWS_GROUP_NAME *
                 return errinfo;
             }
         }
+
+        (*groups)[cursor].group_type = snu;
     }
 
     return errinfo;

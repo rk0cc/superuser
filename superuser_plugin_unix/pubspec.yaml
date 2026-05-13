@@ -1,6 +1,6 @@
 name: superuser_plugin_unix
-description: "Detect, verify user who execute Dart program has superuser role in UNIX"
-version: 4.0.1
+description: "Detect, verify user who execute Dart program has superuser role in UNIX (or POSIX) API"
+version: 4.1.0
 homepage: https://github.com/rk0cc/superuser
 repository: https://github.com/rk0cc/superuser/tree/current/superuser_plugin_unix
 environment:
@@ -10,9 +10,9 @@ dependencies:
   ffi: ^2.2.0
   hooks: ^1.0.0
   native_toolchain_c: ">=0.17.6 <1.0.0"
-  native_toolchain_cmake: ">=0.2.5 <1.0.0"
+  native_toolchain_cmake: ">=0.2.5 <1.0.0" # Retain for possible of using third-party libraries
   code_assets: ^1.0.0
-  superuser_interfaces: ^4.0.0
+  superuser_interfaces: ^4.1.0
 dev_dependencies:
   ffigen: ^20.1.1
   lints: ^6.0.0

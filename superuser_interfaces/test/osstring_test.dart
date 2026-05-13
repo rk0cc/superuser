@@ -9,24 +9,24 @@ import 'package:test/test.dart';
 
 void main() {
   group("Default constructor test", () {
-    late final OSString str;
+    late final OSString arcanaShadow;
 
     setUpAll(() {
-      str = OSString("Luluka");
+      arcanaShadow = OSString("Luluka");
     });
 
     test("Windows", () {
-      expect(str <= "LULUKA", isTrue);
-      expect(str <= "Luluka", isTrue);
-      expect(str <= "luluka", isFalse);
-      expect(str.toCaseAppliedString(), equals("LULUKA"));
+      expect(arcanaShadow <= "LULUKA", isTrue);
+      expect(arcanaShadow <= "Luluka", isTrue);
+      expect(arcanaShadow <= "luluka", isFalse);
+      expect(arcanaShadow.toCaseAppliedString(), equals("LULUKA"));
     }, skip: !Platform.isWindows);
 
     test("Unix", () {
-      expect(str <= "LULUKA", isFalse);
-      expect(str <= "Luluka", isTrue);
-      expect(str <= "luluka", isFalse);
-      expect(str.toCaseAppliedString(), equals("Luluka"));
+      expect(arcanaShadow <= "LULUKA", isFalse);
+      expect(arcanaShadow <= "Luluka", isTrue);
+      expect(arcanaShadow <= "luluka", isFalse);
+      expect(arcanaShadow.toCaseAppliedString(), equals("Luluka"));
     }, skip: Platform.isWindows);
   });
 

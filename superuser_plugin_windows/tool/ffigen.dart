@@ -19,9 +19,13 @@ void main(List<String> args) {
     "NETBIOS_NAME_LEN",
   };
   const structNames = <String>{"_SUPERUSER_ERRORINFO", "_WINDOWS_GROUP_NAME"};
+  const enumNames = <String>{"_SID_NAME_USE"};
   final typedefNames = <String>{
     "ERRCODE",
-    ...structNames.map((s) => s.substring(1)),
+    ...{
+      ...structNames,
+      ...enumNames,
+    }.map((originName) => originName.substring(1)),
   };
 
   FfiGenerator(
@@ -32,6 +36,11 @@ void main(List<String> args) {
       include: (declaration) => macroNames.contains(declaration.originalName),
     ),
     typedefs: Typedefs.includeSet(typedefNames),
+    enums: Enums(
+      include: (declaration) => enumNames.contains(declaration.originalName),
+      style: (declaration, suggestedStyle) => EnumStyle.intConstants,
+      silenceWarning: true,
+    ),
     structs: Structs(
       include: (declaration) => structNames.contains(declaration.originalName),
     ),

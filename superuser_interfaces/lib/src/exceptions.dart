@@ -12,7 +12,7 @@ class SuperuserProcessError extends Error implements OSError {
   final String message;
 
   /// Name of functions from FFI that it cause this error thrown.
-  /// 
+  ///
   /// `entryPoint` refers to a FFI function, which called directly
   /// from Dart VM and `nativeAPI` refers to the name if native API
   /// function, which is a root cause of triggering this error.

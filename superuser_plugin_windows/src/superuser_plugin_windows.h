@@ -40,6 +40,7 @@ extern "C"
     {
         WCHAR name[MAX_USERNAME_CHAR];
         WCHAR domain[MAX_USERNAME_CHAR];
+        SID_NAME_USE group_type;
     } WINDOWS_GROUP_NAME;
 
     // Extract machine name in NetBIOS.

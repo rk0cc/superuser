@@ -27,18 +27,24 @@ class App extends StatelessWidget {
 }
 
 class Context extends StatelessWidget {
-  static const TextStyle _titleStyle =
-      TextStyle(fontSize: 24, fontWeight: FontWeight.w400);
+  static const TextStyle _titleStyle = TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.w400,
+  );
 
-  static const TextStyle _valueStyle =
-      TextStyle(fontSize: 18, fontWeight: FontWeight.w500);
+  static const TextStyle _valueStyle = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
+  );
 
   const Context({super.key});
 
   void _launchWebsite(Uri url) async {
     if (await url_launcher.canLaunchUrl(url)) {
-      await url_launcher.launchUrl(url,
-          mode: url_launcher.LaunchMode.externalApplication);
+      await url_launcher.launchUrl(
+        url,
+        mode: url_launcher.LaunchMode.externalApplication,
+      );
     }
   }
 
@@ -60,106 +66,146 @@ class Context extends StatelessWidget {
   Widget build(BuildContext context) {
     void onDisplayingGroups() async {
       await showDialog<void>(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) {
-            List<OSString> gpList = Superuser.groups.toList(growable: false);
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          List<OSString> gpList = Superuser.groups.toList(growable: false);
 
-            return AlertDialog(
-              title: const Text("Groups"),
-              content:
-                  Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+          return AlertDialog(
+            title: const Text("Groups"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
                 Text("Total joined groups: ${gpList.length}"),
                 SizedBox(
-                    width: 400,
-                    height: 275,
-                    child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: gpList.length,
-                        itemBuilder: (context, index) =>
-                            ListTile(title: Text("${gpList[index]}"))))
-              ]),
-              actions: <TextButton>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text("OK"))
+                  width: 400,
+                  height: 275,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: gpList.length,
+                    itemBuilder: (context, index) =>
+                        ListTile(title: Text("${gpList[index]}")),
+                  ),
+                ),
               ],
-            );
-          });
+            ),
+            actions: <TextButton>[
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
     }
 
     return Scaffold(
-        appBar: AppBar(title: const Text("Superuser")),
-        drawer: Drawer(
-            child: ListView(children: <Widget>[
-          DrawerHeader(
-              decoration:
-                  BoxDecoration(color: Theme.of(context).secondaryHeaderColor),
+      appBar: AppBar(title: const Text("Superuser")),
+      drawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).secondaryHeaderColor,
+              ),
               child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Padding(
-                      padding: const EdgeInsets.all(2),
-                      child: IconButton(
-                          icon: const Icon(Icons.arrow_back),
-                          onPressed: () {
-                            Navigator.pop<void>(context);
-                          })))),
-          ListTile(
-              leading: const FaIcon(FontAwesomeIcons.github, color: Colors.black),
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      Navigator.pop<void>(context);
+                    },
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const FaIcon(
+                FontAwesomeIcons.github,
+                color: Colors.black,
+              ),
               title: const Text("GitHub repository"),
               onTap: () {
                 _launchWebsite(Uri.https("github.com", "/rk0cc/superuser"));
-              }),
-          ListTile(
+              },
+            ),
+            ListTile(
               leading: const FlutterLogo(style: FlutterLogoStyle.markOnly),
               title: const Text("pub.dev"),
               onTap: () {
                 _launchWebsite(Uri.https("pub.dev", "/packages/superuser"));
-              }),
-          const Padding(
-              padding: EdgeInsets.symmetric(vertical: 4), child: Divider()),
-          ListTile(
-              leading:
-                  FaIcon(FontAwesomeIcons.dollarSign, color: Colors.amber[400]),
+              },
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 4),
+              child: Divider(),
+            ),
+            ListTile(
+              leading: FaIcon(
+                FontAwesomeIcons.dollarSign,
+                color: Colors.amber[400],
+              ),
               title: const Text("Donate"),
               onTap: () {
                 _launchWebsite(Uri.https("github.com", "/sponsors/rk0cc"));
-              })
-        ])),
-        body: ListView(
-            padding: const EdgeInsets.only(top: 8, left: 18, right: 18),
-            shrinkWrap: true,
-            children: <Widget>[
-              ListTile(
-                  title: const Text("Username", style: _titleStyle),
-                  trailing: Text("${Superuser.whoAmI}", style: _valueStyle)),
-              const Divider(),
-              Container(
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                          colors: _getStatusGradients(Superuser.isSuperuser))),
-                  child: ListTile(
-                      title:
-                          const Text("Has superuser role", style: _titleStyle),
-                      trailing: Text(Superuser.isSuperuser ? "Yes" : "No",
-                          style: _valueStyle))),
-              const Divider(),
-              Container(
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                          colors: _getStatusGradients(Superuser.isActivated))),
-                  child: ListTile(
-                      title: const Text("Run as superuser", style: _titleStyle),
-                      trailing: Text(Superuser.isActivated ? "Yes" : "No",
-                          style: _valueStyle))),
-              const Divider(),
-              ListTile(
-                  title: const Text("Group"),
-                  trailing: ElevatedButton(
-                      onPressed: onDisplayingGroups,
-                      child: const Text("List all joined groups")))
-            ]));
+              },
+            ),
+          ],
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.only(top: 8, left: 18, right: 18),
+        shrinkWrap: true,
+        children: <Widget>[
+          ListTile(
+            title: const Text("Username", style: _titleStyle),
+            trailing: Text("${Superuser.whoAmI}", style: _valueStyle),
+          ),
+          const Divider(),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: _getStatusGradients(Superuser.isSuperuser),
+              ),
+            ),
+            child: ListTile(
+              title: const Text("Has superuser role", style: _titleStyle),
+              trailing: Text(
+                Superuser.isSuperuser ? "Yes" : "No",
+                style: _valueStyle,
+              ),
+            ),
+          ),
+          const Divider(),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: _getStatusGradients(Superuser.isActivated),
+              ),
+            ),
+            child: ListTile(
+              title: const Text("Run as superuser", style: _titleStyle),
+              trailing: Text(
+                Superuser.isActivated ? "Yes" : "No",
+                style: _valueStyle,
+              ),
+            ),
+          ),
+          const Divider(),
+          ListTile(
+            title: const Text("Group"),
+            trailing: ElevatedButton(
+              onPressed: onDisplayingGroups,
+              child: const Text("List all joined groups"),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

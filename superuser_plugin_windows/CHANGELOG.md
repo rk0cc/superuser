@@ -1,3 +1,8 @@
+## 4.1.0
+
+* Uses proper group filtering by determining their labels
+* Fix incorrect year range of license
+
 ## 4.0.2
 
 * Fix `isAdminUser` used incorrect FFI API.
