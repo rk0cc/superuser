@@ -45,20 +45,20 @@ abstract final class SuperuserInstance {
   /// In another word, only running program in debug mode can freely attach whatever
   /// [SuperuserInterface] implementation is used.
   static void bindInstance(SuperuserInterface? suInterface) {
-    late SuperuserInterface newInst;
+    if (suInterface != null) {
+      _instance = suInterface!;
 
-    if (suInterface == null) {
-      // Denote null interface as uses default implementation.
-      if (Platform.isWindows) {
-        newInst = WindowsSuperuser();
-      } else if (Platform.isMacOS || Platform.isLinux) {
-        newInst = UnixSuperuser();
-      }
-    } else {
-      newInst = suInterface;
+      return;
     }
 
-    _instance = newInst;
+    // Denote null interface as uses default implementation.
+    if (Platform.isWindows) {
+      _instance = WindowsSuperuser();
+    } else if (Platform.isMacOS || Platform.isLinux) {
+        _instance = UnixSuperuser();
+    } else {
+      throw UnimplementedError("No default implementation available for this platform.");
+    }
   }
 
   /// Flush existed [SuperuserInterface] instance.
