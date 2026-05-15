@@ -8,8 +8,30 @@ Instead, `superuser` package offers superuser detection in Dart CLI or Flutter d
 
 ## Limitations
 
-This package only tested using informations given on **local machines** only. Although it can run in domain joined machine since `4.0.0`,
-only local scope can be extracted that any entities related with Activity Directory or LDAP are omitted.
+This package only tested using informations given on **local machines** only. Although it can run in domain joined machine since `4.0.0`, only local scope can be extracted that any entities related with Activity Directory or LDAP are omitted.
+
+For UNIX (or POSIX for more accuracely), Since `/etc/sudoers` only accessible via `visudo` only that it minimize chance of malfunction due to misconfiguration, but forbidden of read access makes impossible to programmically determine the executor is in corresponded group that it is granted to elevate.
+Therefore, except the program is invoked by `root` itself, condition of classifying user has admin right is determined by inspecting a group, which related to `sudo` commands in **DEFAULT** setting:
+
+|Group name|Applied UNIX based platform (and distro)|
+|:---:|:---|
+|`sudo`|Linux in Debian-based (i.e. Debian, Ubuntu)|
+|`admin`|Darwin (macOS&ast;)|
+|`wheel`|Default group for most UNIX platforms (i.e. FreeBSD, Fedora, OpenSUSE, etc...)|
+
+<sup>&ast;&colon; Although <code>wheel</code> group still exists because of inheritance of FreeBSD, most users created with admin right from macOS setting <b>ONLY</b> assigned <code>admin</code> group only.</sup>
+
+If any non-default groups can invoke `sudo` due to modification of `/etc/sudoers` file, inspecting `Superuser.groups` is the most preferred workaround solution:
+
+```dart
+const Set<String> additionalSudoGpNames = <String>{
+    "circle",
+    "ring"
+};
+
+bool get isAdditionalAdminGroups =>
+    additionalSudoGpNames.any(Superuser.groups.containsByString);
+```
 
 ## Implementations
 
@@ -19,7 +41,7 @@ only local scope can be extracted that any entities related with Activity Direct
 
 ```bash
 # Debian based
-sudo apt intall lld
+sudo apt install lld
 
 # Fedora based
 sudo dnf install lld
