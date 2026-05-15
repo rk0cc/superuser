@@ -1,3 +1,9 @@
+## 4.1.2
+
+* Limit condition of throwing `UnsupportedError` if attempting to load default `SuperuserPlatform` in unsupported OS.
+* Indicate `lld` must be installed in Linux environment.
+* Change description in `pubspec.yaml`.
+
 ## 4.1.1
 
 * Fix wrongfully assume `sudo` as sudoer group for all Linux.

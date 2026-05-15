@@ -46,8 +46,7 @@ abstract final class SuperuserInstance {
   /// [SuperuserInterface] implementation is used.
   static void bindInstance(SuperuserInterface? suInterface) {
     if (suInterface != null) {
-      _instance = suInterface!;
-
+      _instance = suInterface;
       return;
     }
 
@@ -55,9 +54,11 @@ abstract final class SuperuserInstance {
     if (Platform.isWindows) {
       _instance = WindowsSuperuser();
     } else if (Platform.isMacOS || Platform.isLinux) {
-        _instance = UnixSuperuser();
+      _instance = UnixSuperuser();
     } else {
-      throw UnimplementedError("No default implementation available for this platform.");
+      throw UnimplementedError(
+        "No default implementation available for this platform.",
+      );
     }
   }
 
