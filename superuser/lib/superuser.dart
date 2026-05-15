@@ -5,7 +5,7 @@
 library superuser;
 
 import 'package:superuser_interfaces/superuser_interfaces.dart'
-    show MockSuperuser, OSString, OSStringsSet;
+    show OSString, OSStringsSet;
 
 import 'src/instance.dart';
 
@@ -15,10 +15,8 @@ export 'package:superuser_interfaces/superuser_interfaces.dart'
 /// A wrapper class that extract status of superuser as well as username.
 ///
 /// By default, [Superuser] will load instance for specific platform automatically.
-/// If mock data is required, please attach [MockSuperuser] into [SuperuserInstance.bindInstance]
-/// before calling any getters in [Superuser]. However, attaching mock instance
-/// must be done only in [kDebugMode] or causing [IllegalInstanceError]
-/// throw otherwise.
+/// See [SuperuserInstance.bindInstance] for detailed information of loading
+/// instance of [Superuser] with conditions.
 abstract final class Superuser {
   const Superuser._();
 
