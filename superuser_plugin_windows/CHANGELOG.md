@@ -1,3 +1,11 @@
+## 4.1.1
+
+* Expand version constraint range of `hooks` for it's new major release
+* Rename built dynamic library without mentioning OS and architecture
+* Use `CodeConfig.targetOS` to guard building proceed for specific platform
+* Exclude `tool/` when publishing package in `pub.dev`
+* Purge `native_toolchain_cmake` due to no deployment plans with third-party C libraries
+
 ## 4.1.0
 
 * Uses proper group filtering by determining their labels
