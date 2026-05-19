@@ -1,3 +1,13 @@
+## 4.1.3
+
+* Bump UNIX and Windows plugins to latest patched version
+    * Expand version constraint range of `hooks` package due to new major release
+    * Remove `native_toolchain_cmake` package
+* Simplify dynamic library name to:
+    * `superuser_plugin.dll` (Windows)
+    * `superuser_plugin.dylib` (macOS)
+    * `libsuperuser_plugin.so` (Linux)
+
 ## 4.1.2
 
 * Limit condition of throwing `UnsupportedError` if attempting to load default `SuperuserPlatform` in unsupported OS.
