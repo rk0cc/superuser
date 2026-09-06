@@ -1,3 +1,7 @@
+## 4.1.2
+
+* Expand version constraint of dependencies for hooking
+
 ## 4.1.1
 
 * Expand version constraint range of `hooks` for it's new major release
